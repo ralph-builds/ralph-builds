@@ -1,8 +1,11 @@
 # ralph builds
 
 visual effects brain
+
 ai-assisted web experiments
+
 interactive demos
+
 live-switched product presentations
 
 ---
@@ -30,7 +33,7 @@ https://flyfx.net/build
 
 ---
 
-Let's rock!
+More soon.
 
 
 <!--
