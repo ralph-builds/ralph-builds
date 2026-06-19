@@ -25,7 +25,7 @@ now applying that same thinking to:
 
 ---
 
-🎬 current work
+🎬 current work: AI-powered creative services
 
 https://flyfx.net/build
 
