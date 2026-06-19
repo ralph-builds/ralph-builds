@@ -25,9 +25,11 @@ now applying that same thinking to:
 
 ---
 
-🎬 current work: AI-powered creative services
+🎬 current work: FLYfx/build — AI-powered creative services
 
 https://flyfx.net/build
+
+Come check out what’s going on over there.
 
 (short demo video coming soon)
 
