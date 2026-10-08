@@ -22,6 +22,21 @@ I'm not a career software engineer. I'm a hands-on creative who loves making thi
 - **[FlyCryptoGuy Apps](https://flycryptoguy.com/apps/)** — A growing collection of crypto tools, including **[Bag Watcher](https://flycryptoguy.com/apps/2/)**, with two more apps in development.
 - **FX Counter 9000 | The FLYfx Observation Deck** — A custom Google Analytics dashboard that turns website traffic into an interactive, cinematic control room. Real data, useful visualizations and a little personality. *(Screenshot below; private dashboard. [Visit the sign-in page](https://flyfx.net/build/fxcounter9000/).)*
 
+### Project gallery
+
+<table>
+<tr>
+<td width="33%" align="center"><a href="https://flyfx.net"><img src="https://github.com/ralph-builds/ralph-builds/raw/refs/heads/main/gallery-flyfx.jpg" alt="FLYfx website screenshot" width="400" /><br /><strong>FLYfx</strong></a></td>
+<td width="33%" align="center"><a href="https://games.flyfx.net"><img src="https://github.com/ralph-builds/ralph-builds/raw/refs/heads/main/gallery-games.jpg" alt="FLYfx Games website screenshot" width="400" /><br /><strong>FLYfx Games</strong></a></td>
+<td width="33%" align="center"><a href="https://flyfx.net/build"><img src="https://github.com/ralph-builds/ralph-builds/raw/refs/heads/main/gallery-build.jpg" alt="FLYfx/build website screenshot" width="400" /><br /><strong>FLYfx/build</strong></a></td>
+</tr>
+<tr>
+<td width="33%" align="center"><a href="https://flyfx.net/build/ralphyscaggs/"><img src="https://github.com/ralph-builds/ralph-builds/raw/refs/heads/main/gallery-ralphy.jpg" alt="Ralphy Scaggs website screenshot" width="400" /><br /><strong>Ralphy Scaggs</strong></a></td>
+<td width="33%" align="center"><a href="https://flycryptoguy.com"><img src="https://github.com/ralph-builds/ralph-builds/raw/refs/heads/main/gallery-crypto.jpg" alt="FlyCryptoGuy website screenshot" width="400" /><br /><strong>FlyCryptoGuy</strong></a></td>
+<td width="33%" align="center"><a href="https://flycryptoguy.com/apps/2/"><img src="https://github.com/ralph-builds/ralph-builds/raw/refs/heads/main/gallery-bagwatcher.jpg" alt="Bag Watcher website screenshot" width="400" /><br /><strong>Bag Watcher</strong></a></td>
+</tr>
+</table>
+
 ### Featured: [FX Counter 9000](https://flyfx.net/build/fxcounter9000/)
 
 <img width="1222" height="690" alt="FX Counter 9000, an interactive website analytics dashboard" src="https://github.com/user-attachments/assets/baa6ffdd-c3bb-4ce2-b524-8ec34e0c4ffd" />
