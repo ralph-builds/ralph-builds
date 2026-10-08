@@ -1,64 +1,39 @@
-# ralph builds
+# ralph builds.
 
-visual effects brain
+**27+ years in visual effects. A new chapter in AI-assisted creation.**
 
-ai-assisted web experiments
+I'm an Autodesk Flame artist and commercial finishing specialist. For more than 27 years, I've helped turn creative ideas into finished pictures, where visual judgment, problem-solving and getting the details right matter.
 
-interactive demos
+In February 2026, I started exploring what AI could make possible for someone with a production background and a head full of ideas. Since then, I've been building interactive websites, games, visual experiments, practical applications and cryptocurrency tools.
 
-live-switched product presentations
+I'm not a career software engineer. I'm a hands-on creative who loves making things that people can actually see, use and explore.
 
----
-
-i build things that are meant to be seen, used and understood.
-
-not just code.
-not just visuals.
-
-i come from decades in high-end visual effects — where clarity, taste and execution under pressure matter.
-
-now applying that same thinking to:
-
-* ai-assisted workflows
-* interactive web prototypes
-* product demos 
-
----
-
-🎬 current work: FLYfx/build — AI-powered creative services
-
-https://flyfx.net/build
-
-Come check out what’s going on over there.
-
-(short demo video coming soon)
-
----
+**The tools have changed. The curiosity hasn't.**
 
 ## ralph builds. and builds. and builds.
 
-Since February 2026, I've enthusiastically embraced AI-assisted creation and attacked it with the same curiosity and determination I've brought to more than 27 years in visual effects and commercial post-production.
-
-Then I started building things. Lots of things.
-
-Websites, games, revived interactive projects, animations, AI imagery, practical apps and cryptocurrency tools. I'm a Flame artist and creative problem-solver, not a career software engineer. I'm excited by how quickly an idea can become something people can actually see and use.
-
-### some of what I've been building
+### Explore the projects
 
 - **[FLYfx](https://flyfx.net)** — My professional home: Autodesk Flame finishing, compositing and commercial VFX.
-- **[FLYfx/build](https://flyfx.net/build)** — AI-assisted creative experiments, workflows and interactive experiences.
-- **[FLYfx games](https://games.flyfx.net)** — Games and interactive projects, including bringing an old Flash game back to life.
+- **[FLYfx/build](https://flyfx.net/build)** — AI-assisted experiments, interactive experiences and creative workflows.
+- **[FLYfx Games](https://games.flyfx.net)** — Playable projects, including a revival of an old Flash-era game for the modern web.
 - **[Ralphy Scaggs](https://flyfx.net/build/ralphyscaggs/)** — Music, imagery, animation and an evolving creative world.
-- **[FlyCryptoGuy](https://flycryptoguy.com)** — Exploring crypto through working tools and experiments, including **[Bag Watcher](https://flycryptoguy.com/apps/2/)**.
-- **⚡ FX Counter 9000 | The FLYfx Observation Deck** — A custom-built Google Analytics dashboard that transforms website traffic data into a cinematic, interactive control room. Real analytics, custom visualizations and a little personality. Built to make data useful and fun to explore. *(Dashboard shown below; live access requires sign-in.)*
+- **[FlyCryptoGuy](https://flycryptoguy.com)** — A home for my interest in cryptocurrency and the tools I'm building around it.
+- **[Bag Watcher](https://flycryptoguy.com/apps/2/)** — A practical crypto-tracking app built to make monitoring holdings and price thresholds easier.
+- **FX Counter 9000 | The FLYfx Observation Deck** — A custom Google Analytics dashboard that turns website traffic into an interactive, cinematic control room. Real data, useful visualizations and a little personality. *(Screenshot below; live dashboard requires sign-in.)*
 
-<img width="1222" height="690" alt="Screenshot 2026-10-08 at 10 31 50 AM" src="https://github.com/user-attachments/assets/baa6ffdd-c3bb-4ce2-b524-8ec34e0c4ffd" />
+### Featured: FX Counter 9000
 
+<img width="1222" height="690" alt="FX Counter 9000, an interactive website analytics dashboard" src="https://github.com/user-attachments/assets/baa6ffdd-c3bb-4ce2-b524-8ec34e0c4ffd" />
 
-And there's more: small utilities, web prototypes, animations, AI image experiments and ideas that started with *“I wonder if I could build that?”*
+### What connects the work
 
-Some projects began before I adopted GitHub in June 2026. This is a selection of the work, not a complete commit-by-commit history.
+I bring the same visual problem-solving and production discipline from commercial finishing into these new projects. I like figuring out how something works, making it useful and giving it a distinct personality.
 
----
+I'm especially interested in where creative production, interactive experiences, AI-assisted workflows and crypto meet. My work is hands-on, from first idea through finished result.
 
-More soon.
+Some projects began before I started using GitHub in June 2026, so this page is a tour of what I've made, not a complete commit history.
+
+**[Explore FLYfx](https://flyfx.net) · [Explore FlyCryptoGuy](https://flycryptoguy.com) · [Play the games](https://games.flyfx.net)**
+
+More to come.
