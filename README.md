@@ -50,7 +50,9 @@ Websites, games, revived interactive projects, animations, AI imagery, practical
 - **[FLYfx games](https://games.flyfx.net)** — Games and interactive projects, including bringing an old Flash game back to life.
 - **[Ralphy Scaggs](https://flyfx.net/build/ralphyscaggs/)** — Music, imagery, animation and an evolving creative world.
 - **[FlyCryptoGuy](https://flycryptoguy.com)** — Exploring crypto through working tools and experiments, including **[Bag Watcher](https://flycryptoguy.com/apps/2/)**.
-- **⚡ FX Counter 9000 | The FLYfx Observation Deck** — A custom-built Google Analytics dashboard that transforms website traffic data into a cinematic, interactive control room. Real analytics, custom visualizations and a little personality. Built to make data useful and fun to explore. *(Authenticated dashboard preview to follow; live access requires sign-in.)*<img width="1222" height="690" alt="Screenshot 2026-10-08 at 10 31 50 AM" src="https://github.com/user-attachments/assets/baa6ffdd-c3bb-4ce2-b524-8ec34e0c4ffd" />
+- **⚡ FX Counter 9000 | The FLYfx Observation Deck** — A custom-built Google Analytics dashboard that transforms website traffic data into a cinematic, interactive control room. Real analytics, custom visualizations and a little personality. Built to make data useful and fun to explore. *(Dashboard shown below; live access requires sign-in.)*
+
+<img width="1222" height="690" alt="Screenshot 2026-10-08 at 10 31 50 AM" src="https://github.com/user-attachments/assets/baa6ffdd-c3bb-4ce2-b524-8ec34e0c4ffd" />
 
 
 And there's more: small utilities, web prototypes, animations, AI image experiments and ideas that started with *“I wonder if I could build that?”*
