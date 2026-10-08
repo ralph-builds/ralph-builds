@@ -14,12 +14,12 @@ I'm not a career software engineer. I'm a hands-on creative who loves making thi
 
 ### Explore the projects
 
-- **[FLYfx](https://flyfx.net)** — My professional home: Autodesk Flame finishing, compositing and commercial VFX.
-- **[FLYfx/build](https://flyfx.net/build)** — AI-assisted experiments, interactive experiences and creative workflows.
+- **[FLYfx](https://flyfx.net)** — I built this deliberately over-the-top, animated website for my Autodesk Flame finishing and VFX business, complete with particles, motion and plenty of personality.
+- **[FLYfx/build](https://flyfx.net/build)** — An evolving home for AI-assisted creative services, experiments and ideas we're developing into client work.
 - **[FLYfx Games](https://games.flyfx.net)** — Playable projects, including a revival of an old Flash-era game for the modern web.
 - **[Ralphy Scaggs](https://flyfx.net/build/ralphyscaggs/)** — Music, imagery, animation and an evolving creative world.
-- **[FlyCryptoGuy](https://flycryptoguy.com)** — A home for my interest in cryptocurrency and the tools I'm building around it.
-- **[Bag Watcher](https://flycryptoguy.com/apps/2/)** — A practical crypto-tracking app built to make monitoring holdings and price thresholds easier.
+- **[FlyCryptoGuy](https://flycryptoguy.com)** — My crypto-focused site, with practical tools and experiments taking shape alongside the content.
+- **[FlyCryptoGuy Apps](https://flycryptoguy.com/apps/)** — A growing collection of crypto tools, including **[Bag Watcher](https://flycryptoguy.com/apps/2/)**, with two more apps in development.
 - **FX Counter 9000 | The FLYfx Observation Deck** — A custom Google Analytics dashboard that turns website traffic into an interactive, cinematic control room. Real data, useful visualizations and a little personality. *(Screenshot below; live dashboard requires sign-in.)*
 
 ### Featured: FX Counter 9000
@@ -34,6 +34,6 @@ I'm especially interested in where creative production, interactive experiences,
 
 Some projects began before I started using GitHub in June 2026, so this page is a tour of what I've made, not a complete commit history.
 
-**[Explore FLYfx](https://flyfx.net) · [Explore FlyCryptoGuy](https://flycryptoguy.com) · [Play the games](https://games.flyfx.net)**
+**[Explore FLYfx](https://flyfx.net) · [FLYfx/build](https://flyfx.net/build) · [FlyCryptoGuy Apps](https://flycryptoguy.com/apps/) · [Bag Watcher](https://flycryptoguy.com/apps/2/) · [Play the games](https://games.flyfx.net)**
 
 More to come.
