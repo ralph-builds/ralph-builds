@@ -50,7 +50,7 @@ Websites, games, revived interactive projects, animations, AI imagery, practical
 - **[FLYfx games](https://games.flyfx.net)** — Games and interactive projects, including bringing an old Flash game back to life.
 - **[Ralphy Scaggs](https://flyfx.net/build/ralphyscaggs/)** — Music, imagery, animation and an evolving creative world.
 - **[FlyCryptoGuy](https://flycryptoguy.com)** — Exploring crypto through working tools and experiments, including **[Bag Watcher](https://flycryptoguy.com/apps/2/)**.
-- **FX Counter 9000** — A playful interactive experiment. A preview is coming soon.
+- **⚡ FX Counter 9000 | The FLYfx Observation Deck** — A custom-built Google Analytics dashboard that transforms website traffic data into a cinematic, interactive control room. Real analytics, custom visualizations and a little personality. Built to make data useful and fun to explore. *(Authenticated dashboard preview to follow; live access requires sign-in.)*
 
 And there's more: small utilities, web prototypes, animations, AI image experiments and ideas that started with *“I wonder if I could build that?”*
 
