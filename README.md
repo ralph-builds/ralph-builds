@@ -20,11 +20,17 @@ I'm not a career software engineer. I'm a hands-on creative who loves making thi
 - **[Ralphy Scaggs](https://flyfx.net/build/ralphyscaggs/)** — Music, imagery, animation and an evolving creative world.
 - **[FlyCryptoGuy](https://flycryptoguy.com)** — My crypto-focused site, with practical tools and experiments taking shape alongside the content.
 - **[FlyCryptoGuy Apps](https://flycryptoguy.com/apps/)** — A growing collection of crypto tools, including **[Bag Watcher](https://flycryptoguy.com/apps/2/)**, with two more apps in development.
-- **FX Counter 9000 | The FLYfx Observation Deck** — A custom Google Analytics dashboard that turns website traffic into an interactive, cinematic control room. Real data, useful visualizations and a little personality. *(Screenshot below; live dashboard requires sign-in.)*
+- **FX Counter 9000 | The FLYfx Observation Deck** — A custom Google Analytics dashboard that turns website traffic into an interactive, cinematic control room. Real data, useful visualizations and a little personality. *(Screenshot below; private dashboard. [Visit the sign-in page](https://flyfx.net/build/fxcounter9000/).)*
 
-### Featured: FX Counter 9000
+### Featured: [FX Counter 9000](https://flyfx.net/build/fxcounter9000/)
 
 <img width="1222" height="690" alt="FX Counter 9000, an interactive website analytics dashboard" src="https://github.com/user-attachments/assets/baa6ffdd-c3bb-4ce2-b524-8ec34e0c4ffd" />
+
+### Find me elsewhere
+
+**[LinkedIn](https://www.linkedin.com/in/flyfx/) · [X / @FLYfx](https://x.com/FLYfx) · [Bluesky](https://bsky.app/profile/flyfx.net) · [Patreon](https://www.patreon.com/cw/ralph_builds)**
+
+Creative work, AI imagery, experiments and updates from the projects.
 
 ### What connects the work
 
