@@ -43,7 +43,7 @@ I'm not a career software engineer. I'm a hands-on creative who loves making thi
 
 ### Find me elsewhere
 
-**[LinkedIn](https://www.linkedin.com/in/flyfx/) · [X / @FLYfx](https://x.com/FLYfx) · [Bluesky](https://bsky.app/profile/flyfx.net) · [Patreon](https://www.patreon.com/cw/ralph_builds)**
+**[LinkedIn](https://www.linkedin.com/in/flyfx/) · [X / @FLYfx](https://x.com/FLYfx) · [Bluesky](https://bsky.app/profile/flyfx.net) · [Instagram / @flyfxdotnet](https://www.instagram.com/flyfxdotnet/) · [Patreon](https://www.patreon.com/cw/ralph_builds)**
 
 Creative work, AI imagery, experiments and updates from the projects.
 
