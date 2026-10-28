@@ -130,16 +130,52 @@
     .drop-title { font-weight: 800; font-size: 18px; }
     .drop-sub { color: var(--muted); font-size: 13px; }
 
-    .tip {
-      margin: 12px 0 0;
-      padding: 12px 14px;
+    .pick-choice { display: grid; gap: 10px; }
+    .pick {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      padding: 16px;
+      border: 2px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface-2);
+      color: var(--text);
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .pick:hover, .pick:focus-within, .pick:focus-visible, .pick[aria-expanded=true] { border-color: var(--accent); }
+    .pick input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+    .pick-icon {
+      display: grid;
+      place-items: center;
+      flex: none;
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: var(--accent-ink);
+      font: 400 18px/1 "Archivo Black", Impact, sans-serif;
+    }
+    .pick-text { display: flex; flex-direction: column; gap: 2px; }
+    .pick-title { font-weight: 800; font-size: 17px; }
+    .pick-sub { color: var(--muted); font-size: 13px; }
+    .guide {
+      padding: 14px 16px 16px;
       border-left: 3px solid var(--accent);
-      border-radius: 8px;
+      border-radius: 10px;
       background: var(--surface-2);
       color: var(--muted);
       font-size: 14px;
     }
-    .tip b { color: var(--text); }
+    .guide ol { margin: 0 0 14px; padding-left: 20px; }
+    .guide li { margin-bottom: 6px; }
+    .guide b { color: var(--text); }
+    .guide-btn { padding: 16px; }
+    .guide-btn .drop-title { color: var(--text); }
     .file-list { list-style: none; margin: 12px 0 0; padding: 0; }
     .file-list li {
       display: flex;
@@ -307,13 +343,46 @@
     <form id="form" novalidate>
       <div class="card">
         <h2><span class="num">1</span> Pick your videos</h2>
-        <label class="drop">
-          <input id="files" type="file" accept="video/*" multiple>
-          <span class="drop-icon" aria-hidden="true">+</span>
-          <span class="drop-title">Choose videos</span>
-          <span class="drop-sub" id="dropSub"></span>
-        </label>
-        <p class="tip" id="iosTip" hidden><b>Want full 4K quality?</b> iPhones shrink videos picked from Photos. Instead, in Photos tap <b>Share → Save to Files</b>, then here tap Choose videos → <b>Choose File</b> and pick it.</p>
+        <div id="files">
+          <!-- Phones other than iPhone/iPad send originals, so they get one simple button. -->
+          <label class="drop" id="simplePick">
+            <input class="file-input" type="file" accept="video/*" multiple>
+            <span class="drop-icon" aria-hidden="true">+</span>
+            <span class="drop-title">Choose videos</span>
+            <span class="drop-sub" data-max-files></span>
+          </label>
+
+          <!-- iPhones shrink videos picked from Photos, so offer the original-quality route too. -->
+          <div class="pick-choice" id="iosPick" hidden>
+            <label class="pick">
+              <input class="file-input" type="file" accept="video/*" multiple>
+              <span class="pick-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z" fill="currentColor"/></svg></span>
+              <span class="pick-text">
+                <span class="pick-title">Quick upload</span>
+                <span class="pick-sub">Straight from Photos. Fastest, but your iPhone sends a smaller copy.</span>
+              </span>
+            </label>
+            <button class="pick" id="fullQualityBtn" type="button" aria-expanded="false" aria-controls="fullGuide">
+              <span class="pick-icon" aria-hidden="true">4K</span>
+              <span class="pick-text">
+                <span class="pick-title">Full 4K quality</span>
+                <span class="pick-sub">Sends the original file. One extra step.</span>
+              </span>
+            </button>
+            <div class="guide" id="fullGuide" hidden>
+              <ol>
+                <li>Open <b>Photos</b>, open your video, tap <b>Share</b> → <b>Save to Files</b> → <b>Save</b>.</li>
+                <li>Come back to this page.</li>
+                <li>Tap the button below, choose <b>Choose File</b> (not Photo Library), and pick your video.</li>
+              </ol>
+              <label class="drop guide-btn">
+                <input class="file-input" type="file" accept="video/*" multiple>
+                <span class="drop-title">Open my Files</span>
+                <span class="drop-sub" data-max-files></span>
+              </label>
+            </div>
+          </div>
+        </div>
         <ul id="fileList" class="file-list"></ul>
         <p class="field-error" id="filesError"></p>
       </div>
@@ -415,11 +484,17 @@
     // --- Setup ---------------------------------------------------------------
     document.querySelectorAll('[data-brand]').forEach((el) => { el.textContent = APP.brandName; });
     document.querySelectorAll('[data-holder]').forEach((el) => { el.textContent = APP.rightsHolder; });
-    $('dropSub').textContent = `Up to ${APP.maxFiles} at a time, from your camera roll or Files`;
+    document.querySelectorAll('[data-max-files]').forEach((el) => { el.textContent = `Up to ${APP.maxFiles} videos at a time`; });
     // iPadOS reports itself as a Mac, so also check for touch.
     const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
       (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
-    $('iosTip').hidden = !isIOS;
+    $('simplePick').hidden = isIOS;
+    $('iosPick').hidden = !isIOS;
+    $('fullQualityBtn').addEventListener('click', () => {
+      const open = $('fullGuide').hidden;
+      $('fullGuide').hidden = !open;
+      $('fullQualityBtn').setAttribute('aria-expanded', String(open));
+    });
     $('prizeText').textContent = APP.prizeText;
     $('youtubeLink').href = APP.youtubeUrl;
     const release = $('releaseText');
@@ -466,6 +541,7 @@
 
     // --- File picking --------------------------------------------------------
     $('files').addEventListener('change', (e) => {
+      if (!e.target.classList.contains('file-input')) return;
       const picked = Array.from(e.target.files || []);
       const errors = [];
       for (const f of picked) {
