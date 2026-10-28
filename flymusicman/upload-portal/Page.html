@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    /* Theme: swap these to match the channel's look. */
+    :root {
+      --bg: #09090c;
+      --surface: #15151b;
+      --surface-2: #1e1e27;
+      --line: #2c2c38;
+      --text: #f4f4f6;
+      --muted: #a2a2b0;
+      --accent: #ffd400;
+      --accent-2: #ff6a00;
+      --accent-ink: #120f00;
+      --error: #ff5a6e;
+      --ok: #3ddc97;
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(1200px 600px at 110% -10%, rgba(255, 106, 0, .18), transparent 60%),
+        radial-gradient(900px 500px at -20% 0%, rgba(255, 212, 0, .12), transparent 60%),
+        var(--bg);
+      color: var(--text);
+      font: 16px/1.5 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: max(28px, env(safe-area-inset-top)) 16px max(40px, env(safe-area-inset-bottom));
+    }
+    [hidden] { display: none !important; }
+
+    .hero { padding: 8px 4px 20px; }
+    .eyebrow {
+      display: inline-block;
+      margin: 0 0 14px;
+      padding: 5px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0 0 12px;
+      font: 400 clamp(34px, 10vw, 52px)/1.02 "Archivo Black", Impact, sans-serif;
+      letter-spacing: -.01em;
+      text-transform: uppercase;
+    }
+    h1 .brand {
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .lede { margin: 0; color: var(--muted); font-size: 17px; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px 18px;
+      margin: 0 0 14px;
+    }
+    h2 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 14px;
+      font-size: 18px;
+      font-weight: 800;
+    }
+    h2 small { color: var(--muted); font-size: 13px; font-weight: 600; }
+    .num {
+      display: grid;
+      place-items: center;
+      flex: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: var(--accent-ink);
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .muted { color: var(--muted); font-size: 14px; margin: 0 0 14px; }
+
+    .drop {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 26px 16px;
+      border: 2px dashed var(--line);
+      border-radius: 14px;
+      background: var(--surface-2);
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .drop:hover, .drop:focus-within { border-color: var(--accent); }
+    .drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+    .drop-icon {
+      display: grid;
+      place-items: center;
+      width: 52px;
+      height: 52px;
+      margin-bottom: 6px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: var(--accent-ink);
+      font-size: 30px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .drop-title { font-weight: 800; font-size: 18px; }
+    .drop-sub { color: var(--muted); font-size: 13px; }
+
+    .file-list { list-style: none; margin: 12px 0 0; padding: 0; }
+    .file-list li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 4px 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      margin-top: 8px;
+      background: var(--surface-2);
+    }
+    .file-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+    .file-size { color: var(--muted); font-size: 13px; flex: none; }
+    .remove {
+      flex: none;
+      width: 36px;
+      height: 36px;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 22px;
+      cursor: pointer;
+    }
+    .remove:hover { color: var(--text); background: var(--line); }
+
+    .field { display: block; margin: 0 0 14px; }
+    .field span { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 600; }
+    input[type=text], input[type=email], textarea {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+      color: var(--text);
+      font: inherit;
+      font-size: 16px; /* 16px stops iPhone from zooming into the field */
+    }
+    input::placeholder, textarea::placeholder { color: #6e6e7c; }
+    input:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+    textarea { resize: vertical; min-height: 84px; }
+
+    .check {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 0;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .check input {
+      flex: none;
+      width: 24px;
+      height: 24px;
+      margin: 0;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .check input:disabled + span { color: var(--muted); }
+
+    .release {
+      max-height: 220px;
+      overflow-y: auto;
+      padding: 14px;
+      margin-bottom: 6px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+      color: #cfcfd8;
+      font-size: 14px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .release p { margin: 0 0 10px; }
+    .release p:last-child { margin: 0; }
+    .release h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--text); }
+
+    .field-error { margin: 6px 0 0; color: var(--error); font-size: 14px; font-weight: 600; min-height: 0; }
+    .field-error:empty { display: none; }
+    .banner {
+      padding: 14px 16px;
+      margin: 0 0 14px;
+      border: 1px solid var(--error);
+      border-radius: 12px;
+      background: rgba(255, 90, 110, .1);
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .cta {
+      display: block;
+      width: 100%;
+      padding: 18px;
+      margin: 6px 0 10px;
+      border: 0;
+      border-radius: 14px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      color: var(--accent-ink);
+      font: 400 20px/1 "Archivo Black", Impact, sans-serif;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(255, 106, 0, .25);
+    }
+    .cta:active { transform: translateY(1px); }
+    .cta:disabled { opacity: .6; cursor: default; }
+    .cta.secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--line); box-shadow: none; font-size: 16px; }
+    .fine { text-align: center; color: var(--muted); font-size: 13px; margin: 0 0 18px; }
+
+    .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+    .big-bar { height: 14px; border-radius: 999px; background: var(--surface-2); overflow: hidden; margin: 14px 0 8px; }
+    .big-bar > div, .bar > div {
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transition: width .3s ease;
+    }
+    .progress-meta { display: flex; justify-content: space-between; color: var(--muted); font-size: 14px; }
+    .progress-meta strong { color: var(--text); font-size: 22px; }
+    .status-line { margin: 12px 0 4px; font-weight: 600; }
+    .keep-open { color: var(--accent); font-size: 14px; font-weight: 600; margin: 0 0 4px; }
+    .up-list { list-style: none; margin: 14px 0 0; padding: 0; }
+    .up-list li { padding: 10px 0; border-top: 1px solid var(--line); }
+    .up-row { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; margin-bottom: 6px; }
+    .up-row .file-name { font-weight: 600; }
+    .up-row .state { color: var(--muted); flex: none; }
+    .up-row .state.ok { color: var(--ok); }
+    .bar { height: 6px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+
+    .done { text-align: center; padding: 30px 20px; }
+    .done-icon {
+      display: grid;
+      place-items: center;
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: var(--accent-ink);
+      font-size: 38px;
+      font-weight: 800;
+    }
+    .done h2 { justify-content: center; font: 400 28px/1.1 "Archivo Black", Impact, sans-serif; text-transform: uppercase; }
+    .done p { color: var(--muted); margin: 0 0 10px; }
+    .done p strong { color: var(--text); }
+
+    footer { text-align: center; color: var(--muted); font-size: 13px; padding-top: 10px; }
+    footer a { color: var(--text); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <p class="eyebrow">Footage drop</p>
+      <h1><span class="brand" data-brand></span><br>wants your footage</h1>
+      <p class="lede">Shot something good? Send it in. Clips that get picked can end up in <span data-brand></span> videos, with your name in the credits if you want.</p>
+    </header>
+
+    <section id="closed" class="card" hidden>
+      <h2>Uploads are paused</h2>
+      <p class="muted">We’re not taking new footage right now. Check back soon.</p>
+    </section>
+
+    <form id="form" novalidate>
+      <div class="card">
+        <h2><span class="num">1</span> Pick your videos</h2>
+        <label class="drop">
+          <input id="files" type="file" accept="video/*" multiple>
+          <span class="drop-icon" aria-hidden="true">+</span>
+          <span class="drop-title">Choose videos</span>
+          <span class="drop-sub" id="dropSub"></span>
+        </label>
+        <ul id="fileList" class="file-list"></ul>
+        <p class="field-error" id="filesError"></p>
+      </div>
+
+      <div class="card">
+        <h2><span class="num">2</span> Get credit <small>optional</small></h2>
+        <label class="field">
+          <span>Credit me as</span>
+          <input id="creditName" type="text" maxlength="80" autocomplete="name" placeholder="Your name or @handle">
+        </label>
+        <label class="field" style="margin-bottom:0">
+          <span>About your clip</span>
+          <textarea id="notes" maxlength="1000" rows="3" placeholder="Where and when you shot it, or anything we should know"></textarea>
+        </label>
+      </div>
+
+      <div class="card">
+        <h2><span class="num">3</span> Future prizes <small>optional</small></h2>
+        <p class="muted" id="prizeText"></p>
+        <label class="field" style="margin-bottom:4px">
+          <span>Email</span>
+          <input id="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" maxlength="254" placeholder="you@example.com">
+        </label>
+        <label class="check">
+          <input id="prizeOptIn" type="checkbox">
+          <span>Make me eligible for future prize giveaways</span>
+        </label>
+        <p class="field-error" id="emailError"></p>
+      </div>
+
+      <div class="card">
+        <h2><span class="num">4</span> Footage release <small>required</small></h2>
+        <div class="release" id="releaseText" tabindex="0" aria-label="Footage release"></div>
+        <label class="check">
+          <input id="confirmedAdult" type="checkbox">
+          <span>I’m 18 or older.</span>
+        </label>
+        <label class="check" style="padding-top:0">
+          <input id="agreedRelease" type="checkbox">
+          <span>I agree to the footage release above and give all rights to my footage to <span data-holder></span>.</span>
+        </label>
+        <p class="field-error" id="releaseError"></p>
+      </div>
+
+      <div class="hp" aria-hidden="true">
+        <label>Leave this empty <input id="website" type="text" tabindex="-1" autocomplete="off"></label>
+      </div>
+
+      <div class="banner" id="formError" hidden></div>
+      <button class="cta" id="submitBtn" type="submit">Send my footage</button>
+      <p class="fine">Big videos can take a few minutes. Keep this page open until it says done.</p>
+    </form>
+
+    <section id="progress" class="card" hidden>
+      <h2 id="progressTitle">Uploading…</h2>
+      <p class="keep-open">Keep this page open and your screen on.</p>
+      <div class="big-bar"><div id="overallBar"></div></div>
+      <div class="progress-meta"><strong id="overallPct">0%</strong><span id="overallBytes"></span></div>
+      <p class="status-line" id="statusLine"></p>
+      <div class="banner" id="uploadError" hidden></div>
+      <button class="cta" id="resumeBtn" type="button" hidden>Resume upload</button>
+      <ul class="up-list" id="upList"></ul>
+    </section>
+
+    <section id="done" class="card done" hidden>
+      <div class="done-icon" aria-hidden="true">✓</div>
+      <h2 id="doneTitle">Got it. Thank you!</h2>
+      <p id="doneSummary"></p>
+      <p id="doneCredit" hidden></p>
+      <p id="donePrize" hidden>You’re on the list for future prize giveaways.</p>
+      <button class="cta secondary" id="againBtn" type="button">Send more footage</button>
+    </section>
+
+    <footer>
+      <a id="youtubeLink" href="#" target="_blank" rel="noopener">Watch <span data-brand></span> on YouTube</a>
+    </footer>
+  </main>
+
+  <script>const APP = <?!= appJson ?>;</script>
+  <script>
+  (() => {
+    'use strict';
+
+    const MAX_RETRIES = 8;
+    const $ = (id) => document.getElementById(id);
+    const state = {
+      files: [],
+      submission: null,
+      offsets: [],
+      fileIndex: 0,
+      // "direct" sends bytes straight to Drive; "relay" goes through the script.
+      relayOnly: false,
+      directWorked: false,
+      running: false,
+      wakeLock: null,
+      meta: null,
+    };
+
+    // --- Setup ---------------------------------------------------------------
+    document.querySelectorAll('[data-brand]').forEach((el) => { el.textContent = APP.brandName; });
+    document.querySelectorAll('[data-holder]').forEach((el) => { el.textContent = APP.rightsHolder; });
+    $('dropSub').textContent = `Up to ${APP.maxFiles} at a time, from your camera roll or Files`;
+    $('prizeText').textContent = APP.prizeText;
+    $('youtubeLink').href = APP.youtubeUrl;
+    const release = $('releaseText');
+    const releaseHeading = document.createElement('h3');
+    releaseHeading.textContent = `Footage release · ${APP.releaseVersion}`;
+    release.appendChild(releaseHeading);
+    APP.releaseText.forEach((para) => {
+      const p = document.createElement('p');
+      p.textContent = para;
+      release.appendChild(p);
+    });
+    if (!APP.accepting) {
+      $('form').hidden = true;
+      $('closed').hidden = false;
+    }
+
+    // --- Helpers -------------------------------------------------------------
+    function fmtBytes(n) {
+      if (n >= 1024 ** 3) return `${(n / 1024 ** 3).toFixed(2)} GB`;
+      if (n >= 1024 ** 2) return `${(n / 1024 ** 2).toFixed(1)} MB`;
+      return `${Math.max(1, Math.round(n / 1024))} KB`;
+    }
+    const extOf = (name) => ((name.match(/\.([a-z0-9]+)$/i) || [])[1] || '').toLowerCase();
+    const isVideo = (f) => (f.type || '').startsWith('video/') || APP.videoExtensions.includes(extOf(f.name));
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    const validEmail = (s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+
+    function call(fn, ...args) {
+      return new Promise((resolve, reject) => {
+        google.script.run
+          .withSuccessHandler(resolve)
+          .withFailureHandler((err) => reject(err instanceof Error ? err : new Error(String(err && err.message || err))))
+          [fn](...args);
+      });
+    }
+
+    function fatal(message) {
+      const err = new Error(message);
+      err.fatal = true;
+      return err;
+    }
+    const isExpired = (err) => /UPLOAD_EXPIRED/.test(err && err.message || '');
+    const friendly = (err) => (err && err.message || 'Something went wrong.').replace(/^(Exception|Error):\s*/, '');
+
+    // --- File picking --------------------------------------------------------
+    $('files').addEventListener('change', (e) => {
+      const picked = Array.from(e.target.files || []);
+      const errors = [];
+      for (const f of picked) {
+        if (!isVideo(f)) { errors.push(`“${f.name}” isn’t a video.`); continue; }
+        if (f.size > APP.maxFileBytes) { errors.push(`“${f.name}” is over ${fmtBytes(APP.maxFileBytes)}.`); continue; }
+        if (f.size === 0) { errors.push(`“${f.name}” is empty.`); continue; }
+        if (state.files.some((x) => x.name === f.name && x.size === f.size && x.lastModified === f.lastModified)) continue;
+        if (state.files.length >= APP.maxFiles) { errors.push(`You can send up to ${APP.maxFiles} videos at a time.`); break; }
+        state.files.push(f);
+      }
+      e.target.value = '';
+      $('filesError').textContent = errors.join(' ');
+      $('formError').hidden = true;
+      renderFiles();
+    });
+
+    function renderFiles() {
+      const list = $('fileList');
+      list.textContent = '';
+      state.files.forEach((f, i) => {
+        const li = document.createElement('li');
+        const name = document.createElement('span');
+        name.className = 'file-name';
+        name.textContent = f.name;
+        const size = document.createElement('span');
+        size.className = 'file-size';
+        size.textContent = fmtBytes(f.size);
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'remove';
+        remove.setAttribute('aria-label', `Remove ${f.name}`);
+        remove.textContent = '×';
+        remove.addEventListener('click', () => { state.files.splice(i, 1); renderFiles(); });
+        li.append(name, size, remove);
+        list.appendChild(li);
+      });
+    }
+
+    // Clear an error as soon as the person fixes it.
+    ['confirmedAdult', 'agreedRelease'].forEach((id) => $(id).addEventListener('change', () => {
+      if ($('confirmedAdult').checked && $('agreedRelease').checked) $('releaseError').textContent = '';
+    }));
+    ['email', 'prizeOptIn'].forEach((id) => $(id).addEventListener(id === 'email' ? 'input' : 'change', () => {
+      $('emailError').textContent = '';
+    }));
+
+    // --- Submit --------------------------------------------------------------
+    $('form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (state.running) return;
+      const meta = readForm();
+      if (!meta) return;
+      state.meta = meta;
+      runUpload();
+    });
+
+    function readForm() {
+      ['filesError', 'emailError', 'releaseError'].forEach((id) => { $(id).textContent = ''; });
+      $('formError').hidden = true;
+      const email = $('email').value.trim();
+      const prizeOptIn = $('prizeOptIn').checked;
+      let firstBad = null;
+      const bad = (id, msg, focusEl) => { $(id).textContent = msg; firstBad = firstBad || focusEl; };
+
+      if (!state.files.length) bad('filesError', 'Pick at least one video.', $('files').closest('.card'));
+      if (email && !validEmail(email)) bad('emailError', 'That email address doesn’t look right.', $('email'));
+      else if (prizeOptIn && !email) bad('emailError', 'Add your email to be eligible for prizes.', $('email'));
+      if (!$('confirmedAdult').checked || !$('agreedRelease').checked) {
+        bad('releaseError', 'Please confirm you’re 18 or older and agree to the release.', $('releaseText').closest('.card'));
+      }
+      if (firstBad) {
+        firstBad.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return null;
+      }
+      return {
+        creditName: $('creditName').value.trim(),
+        notes: $('notes').value.trim(),
+        email,
+        prizeOptIn,
+        confirmedAdult: true,
+        agreedRelease: true,
+        releaseVersion: APP.releaseVersion,
+        website: $('website').value,
+        userAgent: navigator.userAgent,
+        origin: location.origin,
+        files: state.files.map((f) => ({ name: f.name, size: f.size, type: f.type || '' })),
+      };
+    }
+
+    async function runUpload() {
+      state.running = true;
+      $('uploadError').hidden = true;
+      $('resumeBtn').hidden = true;
+      await keepAwake();
+
+      if (!state.submission) {
+        $('submitBtn').disabled = true;
+        $('submitBtn').textContent = 'Starting…';
+        try {
+          state.submission = await call('startSubmission', state.meta);
+        } catch (err) {
+          state.running = false;
+          releaseWake();
+          $('submitBtn').disabled = false;
+          $('submitBtn').textContent = 'Send my footage';
+          $('formError').textContent = friendly(err);
+          $('formError').hidden = false;
+          return;
+        }
+        state.offsets = state.files.map(() => 0);
+        state.fileIndex = 0;
+        $('form').hidden = true;
+        $('progress').hidden = false;
+        buildUploadList();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      try {
+        for (; state.fileIndex < state.files.length; state.fileIndex++) {
+          await uploadOne(state.fileIndex);
+        }
+        setStatus('Finishing up…');
+        const result = await call('finishSubmission', state.submission.submissionId, state.relayOnly ? 'relay' : 'direct');
+        showDone(result);
+      } catch (err) {
+        if (err.fatal) {
+          $('uploadError').textContent = `${friendly(err)} Please reload the page and send your videos again.`;
+        } else {
+          $('uploadError').textContent = 'The upload paused, probably a connection drop. Check your signal, then tap Resume. Nothing already sent is lost.';
+          $('resumeBtn').hidden = false;
+        }
+        $('uploadError').hidden = false;
+        setStatus('');
+      } finally {
+        state.running = false;
+        releaseWake();
+      }
+    }
+
+    $('resumeBtn').addEventListener('click', () => { if (!state.running) runUpload(); });
+
+    async function uploadOne(i) {
+      const file = state.files[i];
+      const up = state.submission.uploads[i];
+      let failures = 0;
+      setStatus(`Sending video ${i + 1} of ${state.files.length}…`);
+      markFile(i, 'Sending…');
+
+      while (state.offsets[i] < file.size) {
+        const start = state.offsets[i];
+        const direct = !!up.sessionUri && !state.relayOnly;
+        const chunk = direct ? state.submission.directChunkBytes : state.submission.relayChunkBytes;
+        const end = Math.min(start + chunk, file.size);
+        try {
+          const result = direct
+            ? await putDirect(up.sessionUri, file, start, end, (sent) => paint(i, start + sent))
+            : await putRelay(up.uploadId, file, start, end);
+          if (direct) state.directWorked = true;
+          failures = 0;
+          state.offsets[i] = result.done ? file.size : result.next;
+          paint(i, state.offsets[i]);
+          if (result.done) break;
+        } catch (err) {
+          if (err.fatal || isExpired(err)) throw fatal('This upload expired.');
+          if (direct && !state.directWorked) {
+            // The browser couldn't reach Drive directly; switch to the relay.
+            state.relayOnly = true;
+          } else {
+            failures += 1;
+            if (failures > MAX_RETRIES) throw err;
+            setStatus(`Connection hiccup. Retrying (${failures} of ${MAX_RETRIES})…`);
+            await sleep(Math.min(30000, 1000 * 2 ** failures));
+          }
+          if (await resync(i)) break;
+          setStatus(`Sending video ${i + 1} of ${state.files.length}…`);
+        }
+      }
+      markFile(i, 'Done', true);
+    }
+
+    /** Asks the server how much of file i arrived. Returns true if it's complete. */
+    async function resync(i) {
+      try {
+        const s = await call('uploadStatus', state.submission.uploads[i].uploadId);
+        state.offsets[i] = s.done ? state.files[i].size : s.next;
+        paint(i, state.offsets[i]);
+        return s.done;
+      } catch (err) {
+        if (isExpired(err)) throw fatal('This upload expired.');
+        return false;
+      }
+    }
+
+    function putDirect(uri, file, start, end, onSent) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', uri, true);
+        xhr.setRequestHeader('Content-Range', `bytes ${start}-${end - 1}/${file.size}`);
+        xhr.upload.onprogress = (e) => onSent(e.loaded);
+        xhr.onload = () => {
+          if (xhr.status === 200 || xhr.status === 201) return resolve({ done: true });
+          if (xhr.status === 308) {
+            const range = xhr.getResponseHeader('Range');
+            return resolve({ done: false, next: range ? Number(range.split('-')[1]) + 1 : end });
+          }
+          if (xhr.status === 404 || xhr.status === 410) return reject(fatal('This upload expired.'));
+          reject(new Error(`HTTP ${xhr.status}`));
+        };
+        xhr.onerror = () => reject(new Error('network'));
+        xhr.send(file.slice(start, end));
+      });
+    }
+
+    async function putRelay(uploadId, file, start, end) {
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
+        reader.onerror = () => reject(reader.error || new Error('read failed'));
+        reader.readAsDataURL(file.slice(start, end));
+      });
+      return call('relayChunk', uploadId, start, base64);
+    }
+
+    // --- Progress UI ---------------------------------------------------------
+    function buildUploadList() {
+      const list = $('upList');
+      list.textContent = '';
+      state.files.forEach((f, i) => {
+        const li = document.createElement('li');
+        li.innerHTML = '<div class="up-row"><span class="file-name"></span><span class="state">Waiting</span></div><div class="bar"><div></div></div>';
+        li.querySelector('.file-name').textContent = f.name;
+        li.id = `up-${i}`;
+        list.appendChild(li);
+      });
+      paintOverall();
+    }
+
+    function paint(i, bytes) {
+      const f = state.files[i];
+      const pct = Math.min(100, (bytes / f.size) * 100);
+      const li = $(`up-${i}`);
+      if (li) li.querySelector('.bar > div').style.width = `${pct}%`;
+      state.live = { i, bytes };
+      paintOverall();
+    }
+
+    function paintOverall() {
+      const total = state.files.reduce((s, f) => s + f.size, 0);
+      let sent = state.offsets.reduce((s, n) => s + n, 0);
+      if (state.live && state.live.bytes > state.offsets[state.live.i]) {
+        sent += state.live.bytes - state.offsets[state.live.i];
+      }
+      const pct = total ? Math.min(100, Math.floor((sent / total) * 100)) : 0;
+      $('overallBar').style.width = `${pct}%`;
+      $('overallPct').textContent = `${pct}%`;
+      $('overallBytes').textContent = `${fmtBytes(sent)} of ${fmtBytes(total)}`;
+    }
+
+    function markFile(i, text, ok) {
+      const el = $(`up-${i}`);
+      if (!el) return;
+      const s = el.querySelector('.state');
+      s.textContent = text;
+      s.classList.toggle('ok', !!ok);
+    }
+
+    function setStatus(text) { $('statusLine').textContent = text; }
+
+    function showDone(result) {
+      $('progress').hidden = true;
+      $('done').hidden = false;
+      const n = result.received;
+      if (result.status === 'Complete') {
+        $('doneTitle').textContent = 'Got it. Thank you!';
+        $('doneSummary').innerHTML = '';
+        $('doneSummary').append('We received ', strong(`${n} video${n === 1 ? '' : 's'}`), '.');
+      } else {
+        $('doneTitle').textContent = 'Almost there';
+        $('doneSummary').textContent = `We received ${n} of ${result.expected} videos. Please send the missing ones again.`;
+      }
+      if (state.meta.creditName) {
+        $('doneCredit').innerHTML = '';
+        $('doneCredit').append('If your footage is used, we’ll credit ', strong(state.meta.creditName), '.');
+        $('doneCredit').hidden = false;
+      }
+      $('donePrize').hidden = !state.meta.prizeOptIn;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function strong(text) {
+      const el = document.createElement('strong');
+      el.textContent = text;
+      return el;
+    }
+
+    $('againBtn').addEventListener('click', () => {
+      Object.assign(state, { files: [], submission: null, offsets: [], fileIndex: 0, live: null, meta: null });
+      renderFiles();
+      ['notes', 'website'].forEach((id) => { $(id).value = ''; });
+      $('submitBtn').disabled = false;
+      $('submitBtn').textContent = 'Send my footage';
+      $('done').hidden = true;
+      $('form').hidden = false;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // --- Keep the phone awake and warn before leaving mid-upload ------------
+    async function keepAwake() {
+      try {
+        if ('wakeLock' in navigator && !state.wakeLock) state.wakeLock = await navigator.wakeLock.request('screen');
+      } catch (e) { /* Not allowed here; the on-page reminder covers it. */ }
+    }
+    function releaseWake() {
+      if (state.wakeLock) state.wakeLock.release().catch(() => {});
+      state.wakeLock = null;
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && state.running) {
+        state.wakeLock = null;
+        keepAwake();
+      }
+    });
+    window.addEventListener('beforeunload', (e) => {
+      if (state.running) { e.preventDefault(); e.returnValue = ''; }
+    });
+  })();
+  </script>
+</body>
+</html>
