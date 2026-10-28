@@ -130,6 +130,16 @@
     .drop-title { font-weight: 800; font-size: 18px; }
     .drop-sub { color: var(--muted); font-size: 13px; }
 
+    .tip {
+      margin: 12px 0 0;
+      padding: 12px 14px;
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      background: var(--surface-2);
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .tip b { color: var(--text); }
     .file-list { list-style: none; margin: 12px 0 0; padding: 0; }
     .file-list li {
       display: flex;
@@ -303,6 +313,7 @@
           <span class="drop-title">Choose videos</span>
           <span class="drop-sub" id="dropSub"></span>
         </label>
+        <p class="tip" id="iosTip" hidden><b>Want full 4K quality?</b> iPhones shrink videos picked from Photos. Instead, in Photos tap <b>Share → Save to Files</b>, then here tap Choose videos → <b>Choose File</b> and pick it.</p>
         <ul id="fileList" class="file-list"></ul>
         <p class="field-error" id="filesError"></p>
       </div>
@@ -405,6 +416,10 @@
     document.querySelectorAll('[data-brand]').forEach((el) => { el.textContent = APP.brandName; });
     document.querySelectorAll('[data-holder]').forEach((el) => { el.textContent = APP.rightsHolder; });
     $('dropSub').textContent = `Up to ${APP.maxFiles} at a time, from your camera roll or Files`;
+    // iPadOS reports itself as a Mac, so also check for touch.
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+      (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+    $('iosTip').hidden = !isIOS;
     $('prizeText').textContent = APP.prizeText;
     $('youtubeLink').href = APP.youtubeUrl;
     const release = $('releaseText');
