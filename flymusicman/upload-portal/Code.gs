@@ -1,5 +1,5 @@
 /**
- * Fly Music Man footage drop.
+ * FlyMusicMan footage drop.
  *
  * A Google Apps Script web app where anyone can upload videos (iPhone-friendly,
  * large files OK) into a Google Drive folder, agree to a footage release, and
@@ -17,9 +17,9 @@
 // > Version: New version > Deploy. The page URL stays the same.
 // ---------------------------------------------------------------------------
 const CONFIG = {
-  BRAND_NAME: 'Fly Music Man',
+  BRAND_NAME: 'FlyMusicMan',
   // The person or business that receives the rights. Use the legal name.
-  RIGHTS_HOLDER: 'Fly Music Man',
+  RIGHTS_HOLDER: 'FlyMusicMan',
   YOUTUBE_URL: 'https://www.youtube.com/@FlyMusicMan',
 
   // Set to false to close the page to new uploads (it shows a "paused" note).
@@ -36,8 +36,8 @@ const CONFIG = {
   // Send a short thank-you to contributors who left an email.
   SEND_THANK_YOU: true,
 
-  FOLDER_NAME: 'Fly Music Man Uploads',
-  SHEET_NAME: 'Fly Music Man Submissions',
+  FOLDER_NAME: 'FlyMusicMan Uploads',
+  SHEET_NAME: 'FlyMusicMan Submissions',
 
   // Change RELEASE_VERSION whenever you change the wording below, so the Sheet
   // records exactly which wording each person agreed to.

@@ -1,6 +1,6 @@
 # flymusicman
 
-Projects for [Fly Music Man](https://www.youtube.com/@FlyMusicMan).
+Projects for [FlyMusicMan](https://www.youtube.com/@FlyMusicMan).
 
 ## [upload-portal](upload-portal/)
 

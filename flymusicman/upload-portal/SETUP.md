@@ -1,4 +1,4 @@
-# Fly Music Man footage drop: setup
+# FlyMusicMan footage drop: setup
 
 A web page where anyone can send videos from their phone straight into your
 Google Drive. They agree to a footage release, can leave a name for credits,
@@ -20,7 +20,7 @@ need a Google account.
 
 1. Go to <https://script.google.com> while signed in to the Google account that
    should own the footage. Click **New project**.
-2. Click **Untitled project** at the top and rename it `Fly Music Man Uploads`.
+2. Click **Untitled project** at the top and rename it `FlyMusicMan Uploads`.
 3. Click the **gear icon (Project Settings)** on the left. Tick **Show
    "appsscript.json" manifest file in editor**. While you're there, set the
    **Time zone** to yours.
@@ -36,10 +36,10 @@ need a Google account.
 5. In the toolbar's function dropdown, pick **setup**, then click **Run**.
    - Google asks you to authorize. Pick your account.
    - You'll see **"Google hasn't verified this app."** That's normal for a
-     script you wrote yourself. Click **Advanced**, then **Go to Fly Music Man
+     script you wrote yourself. Click **Advanced**, then **Go to FlyMusicMan
      Uploads (unsafe)**, then **Allow**.
-   - The log at the bottom shows links to the new **Fly Music Man Uploads**
-     folder and the **Fly Music Man Submissions** sheet in your Drive.
+   - The log at the bottom shows links to the new **FlyMusicMan Uploads**
+     folder and the **FlyMusicMan Submissions** sheet in your Drive.
 6. Click **Deploy > New deployment**. Click the gear next to "Select type" and
    pick **Web app**.
    - Description: `v1`
@@ -65,7 +65,7 @@ You can remove its access any time at <https://myaccount.google.com/permissions>
 From your iPhone, open the Web app URL and:
 
 1. Send a short clip with a name and email. Check that:
-   - the video appears in a new subfolder of **Fly Music Man Uploads**,
+   - the video appears in a new subfolder of **FlyMusicMan Uploads**,
    - a row appears in the **Submissions** tab of the sheet with Status
      **Complete**,
    - you get a notification email, and the contributor email gets a thank-you.
