@@ -84,7 +84,9 @@ From your iPhone, open the Web app URL and:
   (for example to `2026-11-15-v2`). The sheet keeps every version in the
   **Release versions** tab, and each submission records which one the person
   agreed to.
-- **Pause uploads:** set `ACCEPTING_UPLOADS: false`.
+- **Pause uploads right away:** in the editor, pick **pauseUploads** from the
+  function dropdown and click **Run**. Run **resumeUploads** to reopen. No
+  redeploy needed.
 - **Colors:** the `:root` block at the top of `Page.html`.
 
 After any change, publish it to the same URL: **Deploy > Manage deployments >**
@@ -93,8 +95,10 @@ a new URL.)
 
 ## Limits to know about
 
-- Up to 10 videos per submission, 5 GB each, 200 GB a day in total
-  (all adjustable in `CONFIG`). Drive's own cap is 750 GB uploaded per day.
+- Up to 10 videos per submission, 5 GB each, 50 GB in any hour and 200 GB a
+  day in total (all adjustable in `CONFIG`). When a cap is hit, people see an
+  "oversaturated" message and you get one email about it. Drive's own cap is
+  750 GB uploaded per day.
 - Personal Google accounts can send about 100 emails a day. If you get more
   submissions than that, turn off `SEND_THANK_YOU` or `NOTIFY_OWNER`.
   Submissions still work and are still logged when email runs out.

@@ -23,11 +23,17 @@ const CONFIG = {
   YOUTUBE_URL: 'https://www.youtube.com/@FlyMusicMan',
 
   // Set to false to close the page to new uploads (it shows a "paused" note).
+  // To pause without redeploying, run pauseUploads (and resumeUploads to reopen).
   ACCEPTING_UPLOADS: true,
   MAX_FILES_PER_SUBMISSION: 10,
   MAX_FILE_GB: 5,
   // Total accepted per day across everyone. Google Drive's own cap is 750 GB/day.
   DAILY_LIMIT_GB: 200,
+  // Total accepted in any 60 minutes, so one burst can't use up the whole day.
+  HOURLY_LIMIT_GB: 50,
+  // What people see when a cap is hit. You also get an email.
+  DAILY_LIMIT_MESSAGE: 'We’re oversaturated for tonight! So many people sent footage. Please try again tomorrow.',
+  HOURLY_LIMIT_MESSAGE: 'We’re oversaturated right now! So many people are sending footage. Please try again in an hour.',
 
   // Email the owner about each submission. Blank NOTIFY_EMAIL means the account
   // that ran setup(). Personal Google accounts can send about 100 emails a day.
@@ -143,7 +149,7 @@ function publicConfig_() {
     brandName: CONFIG.BRAND_NAME,
     rightsHolder: CONFIG.RIGHTS_HOLDER,
     youtubeUrl: CONFIG.YOUTUBE_URL,
-    accepting: CONFIG.ACCEPTING_UPLOADS && ready,
+    accepting: isAccepting_() && ready,
     maxFiles: CONFIG.MAX_FILES_PER_SUBMISSION,
     maxFileBytes: CONFIG.MAX_FILE_GB * GB,
     videoExtensions: Object.keys(VIDEO_TYPES),
@@ -160,7 +166,7 @@ function publicConfig_() {
  */
 function startSubmission(form) {
   const ids = requireSetup_();
-  if (!CONFIG.ACCEPTING_UPLOADS) throw new Error('Uploads are paused right now. Please check back soon.');
+  if (!isAccepting_()) throw new Error('Uploads are paused right now. Please check back soon.');
   form = form || {};
   if (form.website) throw new Error('Something went wrong. Please reload the page and try again.');
   if (form.releaseVersion !== CONFIG.RELEASE_VERSION) {
@@ -179,7 +185,7 @@ function startSubmission(form) {
 
   const files = validateFiles_(form.files);
   const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
-  reserveDailyBytes_(totalBytes);
+  reserveBytes_(totalBytes);
   ensureReleaseLogged_(ids.sheetId);
 
   const submissionId = newId_(8);
@@ -411,23 +417,74 @@ function validateFiles_(files) {
   });
 }
 
-function reserveDailyBytes_(bytes) {
+/** Counts a submission against the daily and hourly caps, or refuses it. */
+function reserveBytes_(bytes) {
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
     const props = PropertiesService.getScriptProperties();
-    const key = `BYTES_${Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd')}`;
-    const used = Number(props.getProperty(key)) || 0;
-    if (used + bytes > CONFIG.DAILY_LIMIT_GB * GB) {
-      throw new Error('We’ve hit today’s upload limit. Please try again tomorrow.');
+    const now = Date.now();
+    const dayKey = `BYTES_${Utilities.formatDate(new Date(now), Session.getScriptTimeZone(), 'yyyy-MM-dd')}`;
+    const usedToday = Number(props.getProperty(dayKey)) || 0;
+    if (usedToday + bytes > CONFIG.DAILY_LIMIT_GB * GB) {
+      alertOwnerOnce_('DAILY', dayKey, `the daily cap of ${CONFIG.DAILY_LIMIT_GB} GB`);
+      throw new Error(CONFIG.DAILY_LIMIT_MESSAGE);
     }
-    props.setProperty(key, String(used + bytes));
+
+    // The last hour, kept as 5-minute buckets: { "<bucket start in ms>": bytes }.
+    const bucketMs = 5 * 60 * 1000;
+    const recent = JSON.parse(props.getProperty('RECENT_BYTES') || '{}');
+    Object.keys(recent).forEach((start) => {
+      if (Number(start) <= now - 60 * 60 * 1000) delete recent[start];
+    });
+    const usedThisHour = Object.keys(recent).reduce((sum, start) => sum + recent[start], 0);
+    if (usedThisHour + bytes > CONFIG.HOURLY_LIMIT_GB * GB) {
+      alertOwnerOnce_('HOURLY', String(Math.floor(now / (60 * 60 * 1000))), `the hourly cap of ${CONFIG.HOURLY_LIMIT_GB} GB`);
+      throw new Error(CONFIG.HOURLY_LIMIT_MESSAGE);
+    }
+
+    const bucket = String(Math.floor(now / bucketMs) * bucketMs);
+    recent[bucket] = (recent[bucket] || 0) + bytes;
+    props.setProperties({ [dayKey]: String(usedToday + bytes), RECENT_BYTES: JSON.stringify(recent) });
     Object.keys(props.getProperties())
-      .filter((k) => k.startsWith('BYTES_') && k !== key)
+      .filter((k) => k.startsWith('BYTES_') && k !== dayKey)
       .forEach((k) => props.deleteProperty(k));
   } finally {
     lock.releaseLock();
   }
+}
+
+/** Emails the owner the first time a cap is hit in each period. */
+function alertOwnerOnce_(kind, period, capName) {
+  const props = PropertiesService.getScriptProperties();
+  const key = `ALERTED_${kind}`;
+  if (props.getProperty(key) === period) return;
+  props.setProperty(key, period);
+  const to = CONFIG.NOTIFY_EMAIL || props.getProperty('OWNER_EMAIL');
+  if (!to) return;
+  sendMail_({
+    to,
+    subject: `${CONFIG.BRAND_NAME} uploads hit ${capName}`,
+    body: `The upload page just turned someone away because it reached ${capName}.\n\n` +
+      'If this is a real rush, you can raise DAILY_LIMIT_GB or HOURLY_LIMIT_GB in Code.gs and deploy a new version. ' +
+      'If it looks like spam, run pauseUploads in the Apps Script editor to close the page.',
+  });
+}
+
+/** Run from the editor to close the upload page right away. No redeploy needed. */
+function pauseUploads() {
+  PropertiesService.getScriptProperties().setProperty('PAUSED', 'yes');
+  console.log('Uploads are paused. Run resumeUploads to reopen the page.');
+}
+
+/** Run from the editor to reopen the upload page after pauseUploads. */
+function resumeUploads() {
+  PropertiesService.getScriptProperties().deleteProperty('PAUSED');
+  console.log('Uploads are open again.');
+}
+
+function isAccepting_() {
+  return CONFIG.ACCEPTING_UPLOADS && !PropertiesService.getScriptProperties().getProperty('PAUSED');
 }
 
 function requireSetup_() {
