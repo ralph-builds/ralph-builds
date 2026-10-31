@@ -84,9 +84,15 @@ From your iPhone, open the Web app URL and:
   (for example to `2026-11-15-v2`). The sheet keeps every version in the
   **Release versions** tab, and each submission records which one the person
   agreed to.
-- **Pause uploads right away:** in the editor, pick **pauseUploads** from the
-  function dropdown and click **Run**. Run **resumeUploads** to reopen. No
-  redeploy needed.
+- **Pause new uploads right away:** in the editor, click the **gear (Project
+  Settings)**, scroll to **Script properties**, click **Edit script properties
+  > Add script property**, enter `PAUSED` with the value `yes` and click **Save
+  script properties**. Delete that property to reopen. No redeploy needed.
+  Uploads already in progress still finish. Don't change the other properties
+  listed there (FOLDER_ID, SHEET_ID and so on).
+- **Security note:** anyone can call any function in `Code.gs` whose name
+  doesn't end in `_` through the web app, so owner-only actions never get a
+  public function. `setup` only does anything before the app is set up.
 - **Colors:** the `:root` block at the top of `Page.html`.
 
 After any change, publish it to the same URL: **Deploy > Manage deployments >**

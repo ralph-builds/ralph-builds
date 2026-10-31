@@ -576,7 +576,7 @@
           and we’ll customize this app for you.</p>
       </div>
       <p class="brought" id="broughtBy" hidden>Brought to you by <a id="broughtByLink" target="_blank" rel="noopener"></a></p>
-      <p class="powered"><span id="poweredLabel">Brought to you by</span> <a href="https://flyfx.net" target="_blank" rel="noopener"><b>FLY<span>fx</span></b></a> <span class="ver-foot">v17</span></p>
+      <p class="powered"><span id="poweredLabel">Brought to you by</span> <a href="https://flyfx.net" target="_blank" rel="noopener"><b>FLY<span>fx</span></b></a> <span class="ver-foot">v18</span></p>
     </footer>
     </div>
   </main>
@@ -876,7 +876,7 @@
           await uploadOne(state.fileIndex);
         }
         setStatus('Finishing up…');
-        const result = await call('finishSubmission', state.submission.submissionId, state.relayOnly ? 'relay' : 'direct');
+        const result = await call('finishSubmission', state.submission.submissionId, state.relayOnly ? 'relay' : 'direct', state.submission.finishToken);
         showDone(result);
       } catch (err) {
         if (err.fatal) {

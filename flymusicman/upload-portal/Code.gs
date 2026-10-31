@@ -109,10 +109,24 @@ const VIDEO_TYPES = {
 };
 
 /**
- * Run once from the editor. Creates the uploads folder and the log Sheet
- * (inside that folder), and is safe to run again to repair a missing piece.
+ * Run once from the editor, before the first deployment. Creates the uploads
+ * folder and the log Sheet (inside that folder).
+ *
+ * Every function without a trailing underscore can be called by anyone through
+ * the deployed web app, so once both IDs are stored this does nothing at all.
+ * To repair a missing folder or Sheet, the owner deletes FOLDER_ID or SHEET_ID
+ * under Project Settings > Script properties, then runs setup again.
  */
 function setup() {
+  const props = PropertiesService.getScriptProperties();
+  if (props.getProperty('FOLDER_ID') && props.getProperty('SHEET_ID')) {
+    console.log('Already set up. Nothing changed.');
+    return;
+  }
+  setup_();
+}
+
+function setup_() {
   const props = PropertiesService.getScriptProperties();
 
   let folderId = props.getProperty('FOLDER_ID');
@@ -256,6 +270,7 @@ function startSubmission(form) {
 
   return {
     submissionId,
+    finishToken: finishToken_(submissionId),
     uploads,
     directChunkBytes: DIRECT_CHUNK_BYTES,
     relayChunkBytes: RELAY_CHUNK_BYTES,
@@ -299,18 +314,36 @@ function relayChunk(uploadId, start, base64) {
 
 /**
  * Called by the page after the last upload. Counts what actually landed in
- * Drive, updates the Sheet row and sends the emails.
+ * Drive, updates the Sheet row and sends the emails. Needs the token that
+ * startSubmission returned, and only does its work once per submission.
  */
-function finishSubmission(submissionId, method) {
+function finishSubmission(submissionId, method, finishToken) {
   const ids = requireSetup_();
-  const rowNumber = findSubmissionRow_(ids.sheetId, String(submissionId || ''));
+  submissionId = String(submissionId || '');
+  if (!submissionId || String(finishToken || '') !== finishToken_(submissionId)) {
+    throw new Error('We couldn’t find that submission. Please try again.');
+  }
+  // One finish at a time, so a double tap or retry can't send the emails twice.
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    return finishSubmissionLocked_(ids, submissionId, method);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function finishSubmissionLocked_(ids, submissionId, method) {
+  const rowNumber = findSubmissionRow_(ids.sheetId, submissionId);
   if (!rowNumber) throw new Error('We couldn’t find that submission. Please try again.');
 
   const range = `${SUBMISSIONS_TAB}!A${rowNumber}:${columnLetter_(SUBMISSION_HEADERS.length)}${rowNumber}`;
   const row = (Sheets.Spreadsheets.Values.get(ids.sheetId, range).values || [[]])[0];
   while (row.length < SUBMISSION_HEADERS.length) row.push('');
   const expected = Number(row[COL['Files sent']]) || 0;
-  if (row[COL['Status']] === 'Complete') return { status: 'Complete', received: expected, expected };
+  if (row[COL['Status']] !== 'Uploading') {
+    return { status: row[COL['Status']], received: Number(row[COL['Files received']]) || 0, expected };
+  }
 
   const folderMatch = String(row[COL['Folder']]).match(/folders\/([\w-]+)/);
   const files = folderMatch ? listFolder_(folderMatch[1]) : [];
@@ -498,24 +531,21 @@ function alertOwnerOnce_(kind, period, capName) {
     subject: `${CONFIG.BRAND_NAME} uploads hit ${capName}`,
     body: `The upload page just turned someone away because it reached ${capName}.\n\n` +
       'If this is a real rush, you can raise DAILY_LIMIT_GB or HOURLY_LIMIT_GB in Code.gs and deploy a new version. ' +
-      'If it looks like spam, run pauseUploads in the Apps Script editor to close the page.',
+      'If it looks like spam, pause new uploads: in the Apps Script editor open Project Settings > ' +
+      'Script properties and add a property named PAUSED with the value yes. Delete it to reopen.',
   });
 }
 
-/** Run from the editor to close the upload page right away. No redeploy needed. */
-function pauseUploads() {
-  PropertiesService.getScriptProperties().setProperty('PAUSED', 'yes');
-  console.log('Uploads are paused. Run resumeUploads to reopen the page.');
-}
-
-/** Run from the editor to reopen the upload page after pauseUploads. */
-function resumeUploads() {
-  PropertiesService.getScriptProperties().deleteProperty('PAUSED');
-  console.log('Uploads are open again.');
-}
-
+/**
+ * The owner pauses new uploads by adding a Script property named PAUSED with
+ * the value yes (Project Settings > Script properties), and reopens them by
+ * deleting it. Only people who can edit this project can change Script
+ * properties, so there is deliberately no function for this: any function
+ * without a trailing underscore can be called by anyone through the web app.
+ */
 function isAccepting_() {
-  return CONFIG.ACCEPTING_UPLOADS && !PropertiesService.getScriptProperties().getProperty('PAUSED');
+  const paused = String(PropertiesService.getScriptProperties().getProperty('PAUSED') || '').trim().toLowerCase();
+  return CONFIG.ACCEPTING_UPLOADS && !['yes', 'true', '1'].includes(paused);
 }
 
 function requireSetup_() {
@@ -643,6 +673,26 @@ function fillNames_(text) {
 function cleanText_(value, maxLength, keepNewlines) {
   const controls = keepNewlines ? /[\u0000-\u0009\u000b-\u001f\u007f]/g : /[\u0000-\u001f\u007f]/g;
   return String(value == null ? '' : value).replace(controls, ' ').trim().slice(0, maxLength);
+}
+
+/** A token only this script can produce for a submission ID (HMAC with a stored secret). */
+function finishToken_(submissionId) {
+  const props = PropertiesService.getScriptProperties();
+  let secret = props.getProperty('FINISH_SECRET');
+  if (!secret) {
+    const lock = LockService.getScriptLock();
+    lock.waitLock(20000);
+    try {
+      secret = props.getProperty('FINISH_SECRET');
+      if (!secret) {
+        secret = Utilities.getUuid() + Utilities.getUuid();
+        props.setProperty('FINISH_SECRET', secret);
+      }
+    } finally {
+      lock.releaseLock();
+    }
+  }
+  return Utilities.base64EncodeWebSafe(Utilities.computeHmacSha256Signature(submissionId, secret));
 }
 
 function newId_(length) {
