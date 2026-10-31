@@ -235,8 +235,17 @@
     }
     .check input:disabled + span { color: var(--muted); }
 
-    .door { padding: 22px 18px; }
-    .door-summary { margin: 0 0 16px; font-size: 18px; line-height: 1.45; font-weight: 600; }
+    /* First screen and the paused note sit in the middle of the screen. */
+    body.centered .wrap {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .door { padding: 24px 20px; }
+    .door-title { display: block; margin: 0 0 10px; font-size: 24px; line-height: 1.2; }
+    .door-summary { margin: 0 0 16px; font-size: 18px; line-height: 1.45; color: #d6d6de; }
     .door .check { padding: 6px 0 14px; }
     .door .cta { margin: 0; }
     .terms-link { color: var(--accent); }
@@ -387,7 +396,7 @@
 <body>
   <main class="wrap">
     <header class="hero">
-      <h1 class="product"><span class="brand nowrap">Very simple</span><br><span class="nowrap">Video uploads<span class="ver">v06</span></span></h1>
+      <h1 class="product"><span class="brand nowrap">Very simple</span><br><span class="nowrap">Video uploads<span class="ver">v07</span></span></h1>
     </header>
 
     <section id="closed" class="card" hidden>
@@ -397,13 +406,14 @@
 
     <!-- Splash: agree to the terms once, then the app opens. -->
     <section id="door" class="card door" hidden>
+      <h2 class="door-title" id="doorTitle"></h2>
       <p class="door-summary" id="releaseSummary"></p>
       <label class="check">
         <input id="agreeTerms" type="checkbox">
         <span>I’m 18 or older and agree to the <a href="#" class="terms-link" data-terms-name></a>.</span>
       </label>
       <p class="field-error" id="doorError"></p>
-      <button class="cta" id="enterBtn" type="button">Let’s go</button>
+      <button class="cta" id="enterBtn" type="button"></button>
     </section>
 
     <div id="app" hidden>
@@ -598,15 +608,20 @@
       try { return localStorage.getItem(agreedKey) === 'yes'; } catch (e) { return false; }
     }
     function openApp() {
+      document.body.classList.remove('centered');
       $('door').hidden = true;
       $('app').hidden = false;
       window.scrollTo({ top: 0 });
     }
+    $('doorTitle').textContent = APP.doorTitle;
+    $('enterBtn').textContent = APP.doorButton;
     if (!APP.accepting) {
+      document.body.classList.add('centered');
       $('closed').hidden = false;
     } else if (rememberedAgreement()) {
       openApp();
     } else {
+      document.body.classList.add('centered');
       $('door').hidden = false;
     }
     $('agreeTerms').addEventListener('change', () => { $('doorError').textContent = ''; });

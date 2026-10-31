@@ -54,8 +54,10 @@ const CONFIG = {
   // each person agreed to (and returning visitors are asked again).
   TERMS_NAME: 'Footage Terms',
   RELEASE_VERSION: '2026-10-31-v2',
-  // The one plain-English line shown above the checkbox.
-  RELEASE_SUMMARY: 'You keep your footage. You’re just giving {BRAND_NAME} permission to use it in his videos and posts, with credit if you want it.',
+  // The first screen: a heading, one plain-English line above the checkbox, and the button.
+  DOOR_TITLE: 'Thanks for sharing your footage!',
+  RELEASE_SUMMARY: 'Quick OK first: your footage stays yours. You are simply giving permission to use it, with credit if you want it.',
+  DOOR_BUTTON: 'I’m in',
   RELEASE_TEXT: [
     'You keep ownership. Your videos stay yours. Sending them here doesn’t change that, and you can still share them anywhere you like.',
     'You give permission. {RIGHTS_HOLDER} may use, edit and share your videos, in whole or in part, in videos and posts on YouTube, social media and anywhere {RIGHTS_HOLDER} shares music. This permission is free, worldwide and doesn’t expire, so anything already posted can stay up.',
@@ -164,7 +166,9 @@ function publicConfig_() {
     videoExtensions: Object.keys(VIDEO_TYPES),
     releaseVersion: CONFIG.RELEASE_VERSION,
     termsName: CONFIG.TERMS_NAME,
+    doorTitle: fillNames_(CONFIG.DOOR_TITLE),
     releaseSummary: fillNames_(CONFIG.RELEASE_SUMMARY),
+    doorButton: CONFIG.DOOR_BUTTON,
     releaseText: releaseParagraphs_(),
     introText: fillNames_(CONFIG.INTRO_TEXT),
     prizeText: fillNames_(CONFIG.PRIZE_TEXT),
@@ -536,7 +540,7 @@ function ensureReleaseLogged_(sheetId) {
   const logged = (props.getProperty('RELEASES_LOGGED') || '').split('|');
   if (logged.includes(CONFIG.RELEASE_VERSION)) return;
   Sheets.Spreadsheets.Values.append(
-    { values: [[CONFIG.RELEASE_VERSION, formatTime_(new Date()), releaseParagraphs_().join('\n\n')]] },
+    { values: [[CONFIG.RELEASE_VERSION, formatTime_(new Date()), [fillNames_(CONFIG.RELEASE_SUMMARY)].concat(releaseParagraphs_()).join('\n\n')]] },
     sheetId, `'${RELEASES_TAB}'!A1`, { valueInputOption: 'RAW', insertDataOption: 'INSERT_ROWS' });
   props.setProperty('RELEASES_LOGGED', logged.concat(CONFIG.RELEASE_VERSION).filter(Boolean).join('|'));
 }
