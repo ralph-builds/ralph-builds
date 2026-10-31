@@ -10,6 +10,9 @@
  * so it never touches anything else in the owner's Drive.
  *
  * Setup and deployment: see SETUP.md next to this file.
+ *
+ * Internal intake workflow: see INTERNAL-UPLOAD-POLICY.md in the project handoff.
+ * This documentation does not change app behavior.
  */
 
 // ---------------------------------------------------------------------------
