@@ -82,7 +82,8 @@
       font-size: 21px;
       font-weight: 800;
     }
-    h2 small { color: var(--muted); font-size: 16px; font-weight: 600; }
+    /* Step titles shrink a touch on narrow phones so they stay on one line. */
+    #form h2 { font-size: clamp(18px, 5.4vw, 21px); }
     .num {
       display: grid;
       place-items: center;
@@ -508,17 +509,17 @@
       </div>
 
       <div class="card">
-        <h2><span class="num">2</span> Get credit <small>optional</small></h2>
-        <input id="creditName" type="text" maxlength="80" autocomplete="name" placeholder="Your name or @handle" aria-label="Your name or @handle for credits">
+        <h2><span class="num">2</span> <span>Get credit (optional)</span></h2>
+        <input id="creditName" type="text" maxlength="80" autocomplete="name" placeholder="Your name." aria-label="Your name, for credits">
       </div>
 
       <div class="card">
-        <h2><span class="num">3</span> About your clip <small>optional</small></h2>
-        <textarea id="notes" maxlength="1000" rows="3" placeholder="Where and when you shot it, or anything we should know" aria-label="About your clip"></textarea>
+        <h2><span class="num">3</span> <span>About your clip (optional)</span></h2>
+        <textarea id="notes" maxlength="1000" rows="3" placeholder="Where and when you shot it, or anything we should know." aria-label="About your clip"></textarea>
       </div>
 
       <div class="card">
-        <h2><span class="num">4</span> Future prizes <small>optional</small></h2>
+        <h2><span class="num">4</span> <span>Future prizes (optional)</span></h2>
         <p class="muted" id="prizeText"></p>
         <label class="field" style="margin-bottom:4px">
           <span>Email</span>
@@ -575,7 +576,7 @@
           and we’ll customize this app for you.</p>
       </div>
       <p class="brought" id="broughtBy" hidden>Brought to you by <a id="broughtByLink" target="_blank" rel="noopener"></a></p>
-      <p class="powered"><span id="poweredLabel">Brought to you by</span> <a href="https://flyfx.net" target="_blank" rel="noopener"><b>FLY<span>fx</span></b></a> <span class="ver-foot">v15</span></p>
+      <p class="powered"><span id="poweredLabel">Brought to you by</span> <a href="https://flyfx.net" target="_blank" rel="noopener"><b>FLY<span>fx</span></b></a> <span class="ver-foot">v16</span></p>
     </footer>
     </div>
   </main>
