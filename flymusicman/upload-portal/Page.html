@@ -234,6 +234,7 @@
       cursor: pointer;
     }
     .check input:disabled + span { color: var(--muted); }
+    .check .soon { margin-left: 4px; color: var(--muted); font-size: 13px; font-weight: 600; white-space: nowrap; }
 
     /* First screen and the paused note sit in the middle of the screen. */
     body.centered .wrap {
@@ -507,18 +508,16 @@
 
       <div class="card">
         <h2><span class="num">2</span> Get credit <small>optional</small></h2>
-        <label class="field">
-          <span>Credit me as</span>
-          <input id="creditName" type="text" maxlength="80" autocomplete="name" placeholder="Your name or @handle">
-        </label>
-        <label class="field" style="margin-bottom:0">
-          <span>About your clip</span>
-          <textarea id="notes" maxlength="1000" rows="3" placeholder="Where and when you shot it, or anything we should know"></textarea>
-        </label>
+        <input id="creditName" type="text" maxlength="80" autocomplete="name" placeholder="Your name or @handle" aria-label="Your name or @handle for credits">
       </div>
 
       <div class="card">
-        <h2><span class="num">3</span> Future prizes <small>optional</small></h2>
+        <h2><span class="num">3</span> About your clip <small>optional</small></h2>
+        <textarea id="notes" maxlength="1000" rows="3" placeholder="Where and when you shot it, or anything we should know" aria-label="About your clip"></textarea>
+      </div>
+
+      <div class="card">
+        <h2><span class="num">4</span> Future prizes <small>optional</small></h2>
         <p class="muted" id="prizeText"></p>
         <label class="field" style="margin-bottom:4px">
           <span>Email</span>
@@ -527,6 +526,10 @@
         <label class="check">
           <input id="prizeOptIn" type="checkbox">
           <span>Make me eligible for future prize giveaways</span>
+        </label>
+        <label class="check" style="padding-top:0">
+          <input id="newsletterOptIn" type="checkbox">
+          <span>Sign me up for the FLYfx newsletter <small class="soon">coming soon</small></span>
         </label>
         <p class="field-error" id="emailError"></p>
       </div>
@@ -557,6 +560,7 @@
       <p id="doneSummary"></p>
       <p id="doneCredit" hidden></p>
       <p id="donePrize" hidden>You’re on the list for future prize giveaways.</p>
+      <p id="doneNews" hidden>You’re signed up for the FLYfx newsletter.</p>
       <button class="cta secondary" id="againBtn" type="button">Send more footage</button>
     </section>
 
@@ -790,7 +794,7 @@
     }
 
     // Clear an error as soon as the person fixes it.
-    ['email', 'prizeOptIn'].forEach((id) => $(id).addEventListener(id === 'email' ? 'input' : 'change', () => {
+    ['email', 'prizeOptIn', 'newsletterOptIn'].forEach((id) => $(id).addEventListener(id === 'email' ? 'input' : 'change', () => {
       $('emailError').textContent = '';
     }));
 
@@ -809,12 +813,13 @@
       $('formError').hidden = true;
       const email = $('email').value.trim();
       const prizeOptIn = $('prizeOptIn').checked;
+      const newsletterOptIn = $('newsletterOptIn').checked;
       let firstBad = null;
       const bad = (id, msg, focusEl) => { $(id).textContent = msg; firstBad = firstBad || focusEl; };
 
       if (!state.files.length) bad('filesError', 'Pick at least one video.', $('files').closest('.card'));
       if (email && !validEmail(email)) bad('emailError', 'That email address doesn’t look right.', $('email'));
-      else if (prizeOptIn && !email) bad('emailError', 'Add your email to be eligible for prizes.', $('email'));
+      else if ((prizeOptIn || newsletterOptIn) && !email) bad('emailError', 'Add your email above so we can reach you.', $('email'));
       if (firstBad) {
         firstBad.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return null;
@@ -824,6 +829,7 @@
         notes: $('notes').value.trim(),
         email,
         prizeOptIn,
+        newsletterOptIn,
         // Both were confirmed with the single checkbox on the terms screen.
         confirmedAdult: true,
         agreedRelease: true,
@@ -1032,6 +1038,7 @@
         $('doneCredit').hidden = false;
       }
       $('donePrize').hidden = !state.meta.prizeOptIn;
+      $('doneNews').hidden = !state.meta.newsletterOptIn;
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 

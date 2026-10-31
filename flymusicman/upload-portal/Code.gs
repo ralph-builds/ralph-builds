@@ -75,7 +75,7 @@ const CONFIG = {
     'No payment, credit when we can. There’s no payment. We’ll credit you using the name you leave, whenever we can.',
     'Changed your mind? Email {CONTACT_EMAIL} and we’ll leave the video out of anything new.',
   ],
-  PRIZE_TEXT: 'Leave your email to be eligible for future prize giveaways. Any giveaway will have its own official rules, posted before it starts. Your email is only used for giveaways and about your footage, and it’s never sold or shared.',
+  PRIZE_TEXT: 'Leave your email to be eligible for future prize giveaways. Any giveaway will have its own official rules, posted before it starts. Your email is only used for giveaways, your footage and the newsletter if you sign up. It’s never sold or shared.',
 };
 
 // ---------------------------------------------------------------------------
@@ -87,7 +87,7 @@ const SUBMISSION_HEADERS = [
   'Started', 'Submission ID', 'Status', 'Credit name', 'Email', 'Prize opt-in',
   'Notes', 'Files sent', 'Files received', 'Size (MB)', 'Folder', 'File names',
   'Release version', 'Agreed to release', 'Confirmed 18+', 'Device', 'Completed',
-  'Upload method',
+  'Upload method', 'Newsletter opt-in',
 ];
 const COL = SUBMISSION_HEADERS.reduce((map, name, i) => (map[name] = i, map), {});
 
@@ -207,13 +207,15 @@ function startSubmission(form) {
   const notes = cleanText_(form.notes, 1000, true);
   const email = cleanText_(form.email, 254).toLowerCase();
   if (email && !EMAIL_RE.test(email)) throw new Error('That email address doesn’t look right.');
-  if (form.prizeOptIn === true && !email) throw new Error('Add your email to be eligible for prizes.');
+  if ((form.prizeOptIn === true || form.newsletterOptIn === true) && !email) throw new Error('Add your email so we can reach you.');
   const prizeOptIn = form.prizeOptIn === true;
+  const newsletterOptIn = form.newsletterOptIn === true;
 
   const files = validateFiles_(form.files);
   const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
   reserveBytes_(totalBytes);
   ensureReleaseLogged_(ids.sheetId);
+  ensureHeaders_(ids.sheetId);
 
   const submissionId = newId_(8);
   const started = formatTime_(new Date());
@@ -237,6 +239,7 @@ function startSubmission(form) {
   row[COL['Credit name']] = creditName;
   row[COL['Email']] = email;
   row[COL['Prize opt-in']] = prizeOptIn ? 'Yes' : 'No';
+  row[COL['Newsletter opt-in']] = newsletterOptIn ? 'Yes' : 'No';
   row[COL['Notes']] = notes;
   row[COL['Files sent']] = files.length;
   row[COL['Files received']] = 0;
@@ -326,6 +329,7 @@ function finishSubmission(submissionId, method) {
     creditName: row[COL['Credit name']],
     email: row[COL['Email']],
     prizeOptIn: row[COL['Prize opt-in']] === 'Yes',
+    newsletterOptIn: row[COL['Newsletter opt-in']] === 'Yes',
     notes: row[COL['Notes']],
     folderUrl: row[COL['Folder']],
     status,
@@ -545,6 +549,15 @@ function findSubmissionRow_(sheetId, submissionId) {
   return 0;
 }
 
+/** Adds any new column headers to an existing Sheet (new columns go on the end). */
+function ensureHeaders_(sheetId) {
+  const props = PropertiesService.getScriptProperties();
+  const key = SUBMISSION_HEADERS.join('|');
+  if (props.getProperty('HEADERS') === key) return;
+  writeRow_(sheetId, `${SUBMISSIONS_TAB}!A1`, SUBMISSION_HEADERS);
+  props.setProperty('HEADERS', key);
+}
+
 /** Keeps a copy of every release wording people have agreed to. */
 function ensureReleaseLogged_(sheetId) {
   const props = PropertiesService.getScriptProperties();
@@ -572,7 +585,7 @@ function notifyOwner_(s, sheetId) {
     `${s.received} of ${s.expected} video(s), ${toMb_(s.receivedBytes)} MB. Status: ${s.status}.`,
     '',
     `Credit name: ${s.creditName || '(none)'}`,
-    `Email: ${s.email || '(none)'}${s.prizeOptIn ? ' (prize opt-in)' : ''}`,
+    `Email: ${s.email || '(none)'}${[s.prizeOptIn && 'prizes', s.newsletterOptIn && 'newsletter'].filter(Boolean).map((x) => ` (${x} opt-in)`).join('')}`,
     `Notes: ${s.notes || '(none)'}`,
     '',
     `Footage: ${s.folderUrl}`,
@@ -592,6 +605,7 @@ function thankContributor_(s) {
     '',
     `Thanks for sending your footage to ${CONFIG.BRAND_NAME}! We received ${s.received} video(s).`,
     s.prizeOptIn ? 'You’re on the list for future prize giveaways. We’ll email you if one comes up.' : '',
+    s.newsletterOptIn ? 'You’re signed up for the FLYfx newsletter. It’s coming soon.' : '',
     '',
     `More at ${CONFIG.WEBSITE_URL}`,
     '',
