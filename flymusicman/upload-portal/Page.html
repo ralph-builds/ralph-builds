@@ -693,7 +693,7 @@
       // Give the headline font a moment to load so the title doesn't swap mid-fade.
       await Promise.race([document.fonts ? document.fonts.ready : null, sleep(800)]);
       splash.classList.add('show');
-      await sleep(2000);
+      await sleep(3500);
       if (finished) return;
       splash.classList.add('out');
       await sleep(650);
