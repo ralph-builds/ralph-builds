@@ -42,18 +42,6 @@
     [hidden] { display: none !important; }
 
     .hero { padding: 8px 4px 20px; }
-    .eyebrow {
-      display: inline-block;
-      margin: 0 0 14px;
-      padding: 5px 12px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      color: var(--accent);
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-    }
     h1 {
       margin: 0 0 12px;
       font: 400 clamp(34px, 10vw, 52px)/1.02 "Archivo Black", Impact, sans-serif;
@@ -61,6 +49,8 @@
       text-transform: uppercase;
     }
     h1 .nowrap { white-space: nowrap; }
+    /* Product headline: sized so each line stays on one line, phone to desktop. */
+    h1.product { font-size: clamp(24px, 8.3vw, 60px); margin: 0; }
     /* Small version tag, sitting on the baseline of "footage". */
     h1 .ver {
       margin-left: 8px;
@@ -75,7 +65,7 @@
       background-clip: text;
       color: transparent;
     }
-    .lede { margin: 0; color: var(--muted); font-size: 17px; }
+    .lede { margin: 0 4px 20px; color: var(--muted); font-size: 17px; }
 
     .card {
       background: var(--surface);
@@ -245,21 +235,38 @@
     }
     .check input:disabled + span { color: var(--muted); }
 
-    .release {
-      max-height: 220px;
+    .door { padding: 22px 18px; }
+    .door-summary { margin: 0 0 16px; font-size: 18px; line-height: 1.45; font-weight: 600; }
+    .door .check { padding: 6px 0 14px; }
+    .door .cta { margin: 0; }
+    .terms-link { color: var(--accent); }
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(0, 0, 0, .7);
+    }
+    .modal-panel {
+      width: 100%;
+      max-width: 560px;
+      max-height: 85vh;
       overflow-y: auto;
-      padding: 14px;
-      margin-bottom: 6px;
+      padding: 22px 20px 20px;
       border: 1px solid var(--line);
-      border-radius: 12px;
-      background: var(--surface-2);
+      border-radius: var(--radius);
+      background: var(--surface);
       color: #cfcfd8;
-      font-size: 14px;
+      font-size: 15px;
       -webkit-overflow-scrolling: touch;
     }
-    .release p { margin: 0 0 10px; }
-    .release p:last-child { margin: 0; }
-    .release h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--text); }
+    .modal-panel h2 { margin-bottom: 4px; color: var(--text); }
+    .modal-version { margin: 0 0 14px; color: var(--muted); font-size: 12px; letter-spacing: .06em; }
+    .modal-panel p { margin: 0 0 12px; }
+    .modal-panel .cta { margin: 6px 0 0; }
 
     .field-error { margin: 6px 0 0; color: var(--error); font-size: 14px; font-weight: 600; min-height: 0; }
     .field-error:empty { display: none; }
@@ -333,6 +340,9 @@
     .done p strong { color: var(--text); }
 
     footer { text-align: center; color: var(--muted); font-size: 13px; padding-top: 10px; }
+    .powered { margin: 0 0 14px; font-size: 14px; }
+    .powered b { color: var(--text); }
+    .powered b span { color: var(--accent); }
     footer a { color: var(--text); font-weight: 600; }
     .own {
       margin: 26px 0 0;
@@ -377,15 +387,27 @@
 <body>
   <main class="wrap">
     <header class="hero">
-      <p class="eyebrow">Footage drop</p>
-      <h1><span class="brand" data-brand></span><br>wants your <span class="nowrap">footage<span class="ver">v05</span></span></h1>
-      <p class="lede">Shot something good? Send it in. Clips that get picked can end up in <span data-brand></span> videos, with your name in the credits if you want.</p>
+      <h1 class="product"><span class="brand nowrap">Very simple</span><br><span class="nowrap">Video uploads<span class="ver">v06</span></span></h1>
     </header>
 
     <section id="closed" class="card" hidden>
       <h2>Uploads are paused</h2>
       <p class="muted">We’re not taking new footage right now. Check back soon.</p>
     </section>
+
+    <!-- Splash: agree to the terms once, then the app opens. -->
+    <section id="door" class="card door" hidden>
+      <p class="door-summary" id="releaseSummary"></p>
+      <label class="check">
+        <input id="agreeTerms" type="checkbox">
+        <span>I’m 18 or older and agree to the <a href="#" class="terms-link" data-terms-name></a>.</span>
+      </label>
+      <p class="field-error" id="doorError"></p>
+      <button class="cta" id="enterBtn" type="button">Let’s go</button>
+    </section>
+
+    <div id="app" hidden>
+    <p class="lede" id="introText"></p>
 
     <form id="form" novalidate>
       <div class="card">
@@ -460,27 +482,13 @@
         <p class="field-error" id="emailError"></p>
       </div>
 
-      <div class="card">
-        <h2><span class="num">4</span> Footage release <small>required</small></h2>
-        <div class="release" id="releaseText" tabindex="0" aria-label="Footage release"></div>
-        <label class="check">
-          <input id="confirmedAdult" type="checkbox">
-          <span>I’m 18 or older.</span>
-        </label>
-        <label class="check" style="padding-top:0">
-          <input id="agreedRelease" type="checkbox">
-          <span>I agree to the footage release above and give all rights to my footage to <span data-holder></span>.</span>
-        </label>
-        <p class="field-error" id="releaseError"></p>
-      </div>
-
       <div class="hp" aria-hidden="true">
         <label>Leave this empty <input id="website" type="text" tabindex="-1" autocomplete="off"></label>
       </div>
 
       <div class="banner" id="formError" hidden></div>
       <button class="cta" id="submitBtn" type="submit">Send my footage</button>
-      <p class="fine">Big videos can take a few minutes. Keep this page open until it says done.</p>
+      <p class="fine">Big videos can take a few minutes. Keep this page open until it says done.<br>You agreed to the <a href="#" class="terms-link" data-terms-name></a>.</p>
     </form>
 
     <section id="progress" class="card" hidden>
@@ -504,6 +512,7 @@
     </section>
 
     <footer>
+      <p class="powered">Very Simple Video Uploads · by <b>FLY<span>fx</span></b></p>
       <a id="youtubeLink" href="#" target="_blank" rel="noopener">Watch <span data-brand></span> on YouTube</a>
       <!-- "Get your own" pitch. Remove this block for client pages that shouldn't carry it. -->
       <div class="own">
@@ -517,7 +526,18 @@
         </div>
       </div>
     </footer>
+    </div>
   </main>
+
+  <!-- Full terms, opened from the "Footage Terms" links. -->
+  <div class="modal" id="termsModal" hidden>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="termsTitle">
+      <h2 id="termsTitle" data-terms-name></h2>
+      <p class="modal-version" id="termsVersion"></p>
+      <div id="termsText"></div>
+      <button class="cta secondary" id="termsClose" type="button">Close</button>
+    </div>
+  </div>
 
   <script>const APP = <?!= appJson ?>;</script>
   <script>
@@ -541,7 +561,7 @@
 
     // --- Setup ---------------------------------------------------------------
     document.querySelectorAll('[data-brand]').forEach((el) => { el.textContent = APP.brandName; });
-    document.querySelectorAll('[data-holder]').forEach((el) => { el.textContent = APP.rightsHolder; });
+    document.querySelectorAll('[data-terms-name]').forEach((el) => { el.textContent = APP.termsName; });
     document.querySelectorAll('[data-max-files]').forEach((el) => { el.textContent = `Up to ${APP.maxFiles} videos at a time`; });
     // iPadOS reports itself as a Mac, so also check for touch.
     const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
@@ -555,19 +575,63 @@
     });
     $('prizeText').textContent = APP.prizeText;
     $('youtubeLink').href = APP.youtubeUrl;
-    const release = $('releaseText');
-    const releaseHeading = document.createElement('h3');
-    releaseHeading.textContent = `Footage release · ${APP.releaseVersion}`;
-    release.appendChild(releaseHeading);
+    $('introText').textContent = APP.introText;
+    $('releaseSummary').textContent = APP.releaseSummary;
+    $('termsVersion').textContent = `Version ${APP.releaseVersion}`;
     APP.releaseText.forEach((para) => {
+      // Bold each term's short opening line ("You keep ownership.") so it skims easily.
       const p = document.createElement('p');
-      p.textContent = para;
-      release.appendChild(p);
+      const cut = para.search(/[.?] /) + 1;
+      if (cut > 0 && cut < 40) {
+        const lead = document.createElement('strong');
+        lead.textContent = para.slice(0, cut);
+        p.append(lead, para.slice(cut));
+      } else {
+        p.textContent = para;
+      }
+      $('termsText').appendChild(p);
     });
-    if (!APP.accepting) {
-      $('form').hidden = true;
-      $('closed').hidden = false;
+
+    // --- Terms screen: agree once per terms version, then the app opens ----
+    const agreedKey = `vsvu-agreed-${APP.releaseVersion}`;
+    function rememberedAgreement() {
+      try { return localStorage.getItem(agreedKey) === 'yes'; } catch (e) { return false; }
     }
+    function openApp() {
+      $('door').hidden = true;
+      $('app').hidden = false;
+      window.scrollTo({ top: 0 });
+    }
+    if (!APP.accepting) {
+      $('closed').hidden = false;
+    } else if (rememberedAgreement()) {
+      openApp();
+    } else {
+      $('door').hidden = false;
+    }
+    $('agreeTerms').addEventListener('change', () => { $('doorError').textContent = ''; });
+    $('enterBtn').addEventListener('click', () => {
+      if (!$('agreeTerms').checked) {
+        $('doorError').textContent = `Please tick the box to agree to the ${APP.termsName}.`;
+        return;
+      }
+      try { localStorage.setItem(agreedKey, 'yes'); } catch (e) { /* Private browsing: they'll just be asked again next visit. */ }
+      openApp();
+    });
+
+    function openTerms(e) {
+      e.preventDefault();
+      $('termsModal').hidden = false;
+      document.body.style.overflow = 'hidden';
+    }
+    function closeTerms() {
+      $('termsModal').hidden = true;
+      document.body.style.overflow = '';
+    }
+    document.querySelectorAll('.terms-link').forEach((a) => a.addEventListener('click', openTerms));
+    $('termsClose').addEventListener('click', closeTerms);
+    $('termsModal').addEventListener('click', (e) => { if (e.target === $('termsModal')) closeTerms(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('termsModal').hidden) closeTerms(); });
 
     // --- Helpers -------------------------------------------------------------
     function fmtBytes(n) {
@@ -640,9 +704,6 @@
     }
 
     // Clear an error as soon as the person fixes it.
-    ['confirmedAdult', 'agreedRelease'].forEach((id) => $(id).addEventListener('change', () => {
-      if ($('confirmedAdult').checked && $('agreedRelease').checked) $('releaseError').textContent = '';
-    }));
     ['email', 'prizeOptIn'].forEach((id) => $(id).addEventListener(id === 'email' ? 'input' : 'change', () => {
       $('emailError').textContent = '';
     }));
@@ -658,7 +719,7 @@
     });
 
     function readForm() {
-      ['filesError', 'emailError', 'releaseError'].forEach((id) => { $(id).textContent = ''; });
+      ['filesError', 'emailError'].forEach((id) => { $(id).textContent = ''; });
       $('formError').hidden = true;
       const email = $('email').value.trim();
       const prizeOptIn = $('prizeOptIn').checked;
@@ -668,9 +729,6 @@
       if (!state.files.length) bad('filesError', 'Pick at least one video.', $('files').closest('.card'));
       if (email && !validEmail(email)) bad('emailError', 'That email address doesn’t look right.', $('email'));
       else if (prizeOptIn && !email) bad('emailError', 'Add your email to be eligible for prizes.', $('email'));
-      if (!$('confirmedAdult').checked || !$('agreedRelease').checked) {
-        bad('releaseError', 'Please confirm you’re 18 or older and agree to the release.', $('releaseText').closest('.card'));
-      }
       if (firstBad) {
         firstBad.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return null;
@@ -680,6 +738,7 @@
         notes: $('notes').value.trim(),
         email,
         prizeOptIn,
+        // Both were confirmed with the single checkbox on the terms screen.
         confirmedAdult: true,
         agreedRelease: true,
         releaseVersion: APP.releaseVersion,

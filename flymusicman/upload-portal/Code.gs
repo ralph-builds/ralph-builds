@@ -18,9 +18,13 @@
 // ---------------------------------------------------------------------------
 const CONFIG = {
   BRAND_NAME: 'FlyMusicMan',
-  // The person or business that receives the rights. Use the legal name.
+  // The person or business that gets permission to use the footage. Use the legal name.
   RIGHTS_HOLDER: 'FlyMusicMan',
   YOUTUBE_URL: 'https://www.youtube.com/@FlyMusicMan',
+  // Where people can write to ask for a video to be left out of anything new.
+  CONTACT_EMAIL: 'jarvis@flyfx.net',
+  // The line under the headline, shown once people are past the terms screen.
+  INTRO_TEXT: 'Send your videos straight to {BRAND_NAME}. Clips that get picked can end up in his videos, with your name in the credits if you want.',
 
   // Set to false to close the page to new uploads (it shows a "paused" note).
   // To pause without redeploying, run pauseUploads (and resumeUploads to reopen).
@@ -45,14 +49,19 @@ const CONFIG = {
   FOLDER_NAME: 'FlyMusicMan Uploads',
   SHEET_NAME: 'FlyMusicMan Submissions',
 
-  // Change RELEASE_VERSION whenever you change the wording below, so the Sheet
-  // records exactly which wording each person agreed to.
-  RELEASE_VERSION: '2026-10-28-v1',
+  // The terms people agree to on the first screen. Change RELEASE_VERSION
+  // whenever you change the wording, so the Sheet records exactly which wording
+  // each person agreed to (and returning visitors are asked again).
+  TERMS_NAME: 'Footage Terms',
+  RELEASE_VERSION: '2026-10-31-v2',
+  // The one plain-English line shown above the checkbox.
+  RELEASE_SUMMARY: 'You keep your footage. You’re just giving {BRAND_NAME} permission to use it in his videos and posts, with credit if you want it.',
   RELEASE_TEXT: [
-    'I recorded the video(s) I’m uploading, or I otherwise own all rights to them, and they don’t infringe anyone else’s rights. Anyone who can be recognized in the footage agreed to be filmed and to have the footage used as described here.',
-    'I transfer to {RIGHTS_HOLDER} all of my rights, title and interest in the footage, including copyright. Where a right can’t be transferred, I give {RIGHTS_HOLDER} an exclusive, permanent, worldwide, royalty-free license to it, and I waive any moral rights. {RIGHTS_HOLDER}, and anyone {RIGHTS_HOLDER} authorizes, may use, edit, copy, combine, publish and sell the footage, in whole or in part, in any media now known or invented later, for any purpose, including commercial use.',
-    'I won’t be paid for the footage or for any use of it. {RIGHTS_HOLDER} doesn’t have to use it. Credit is up to {RIGHTS_HOLDER}; leaving my name doesn’t guarantee credit.',
-    'I release {RIGHTS_HOLDER} from any claims related to the use of the footage, including claims about privacy or the use of my name, voice or likeness as they appear in it. This agreement is permanent and can’t be revoked.',
+    'You keep ownership. Your videos stay yours. Sending them here doesn’t change that, and you can still share them anywhere you like.',
+    'You give permission. {RIGHTS_HOLDER} may use, edit and share your videos, in whole or in part, in videos and posts on YouTube, social media and anywhere {RIGHTS_HOLDER} shares music. This permission is free, worldwide and doesn’t expire, so anything already posted can stay up.',
+    'It’s yours to share. You shot the videos yourself, and anyone clearly recognizable in them was OK being filmed.',
+    'No payment, credit when we can. There’s no payment. We’ll credit you using the name you leave, whenever we can.',
+    'Changed your mind? Email {CONTACT_EMAIL} and we’ll leave the video out of anything new.',
   ],
   PRIZE_TEXT: 'Leave your email to be eligible for future {BRAND_NAME} prize giveaways. Any giveaway will have its own official rules, posted before it starts. We’ll only use your email for giveaways and about your footage, and we won’t sell or share it.',
 };
@@ -138,7 +147,7 @@ function doGet() {
   // Escape "<" so the JSON can't close the <script> tag it sits in.
   template.appJson = JSON.stringify(publicConfig_()).replace(/</g, '\\u003c');
   return template.evaluate()
-    .setTitle(`Send your footage to ${CONFIG.BRAND_NAME}`)
+    .setTitle(`Very Simple Video Uploads · ${CONFIG.BRAND_NAME}`)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
@@ -154,7 +163,10 @@ function publicConfig_() {
     maxFileBytes: CONFIG.MAX_FILE_GB * GB,
     videoExtensions: Object.keys(VIDEO_TYPES),
     releaseVersion: CONFIG.RELEASE_VERSION,
+    termsName: CONFIG.TERMS_NAME,
+    releaseSummary: fillNames_(CONFIG.RELEASE_SUMMARY),
     releaseText: releaseParagraphs_(),
+    introText: fillNames_(CONFIG.INTRO_TEXT),
     prizeText: fillNames_(CONFIG.PRIZE_TEXT),
   };
 }
@@ -173,7 +185,7 @@ function startSubmission(form) {
     throw new Error('This page has been updated. Please reload it and try again.');
   }
   if (form.agreedRelease !== true || form.confirmedAdult !== true) {
-    throw new Error('Please confirm you’re 18 or older and agree to the footage release.');
+    throw new Error(`Please confirm you’re 18 or older and agree to the ${CONFIG.TERMS_NAME}.`);
   }
 
   const creditName = cleanText_(form.creditName, 80);
@@ -593,7 +605,10 @@ function releaseParagraphs_() {
 }
 
 function fillNames_(text) {
-  return text.replace(/\{RIGHTS_HOLDER\}/g, CONFIG.RIGHTS_HOLDER).replace(/\{BRAND_NAME\}/g, CONFIG.BRAND_NAME);
+  return text
+    .replace(/\{RIGHTS_HOLDER\}/g, CONFIG.RIGHTS_HOLDER)
+    .replace(/\{BRAND_NAME\}/g, CONFIG.BRAND_NAME)
+    .replace(/\{CONTACT_EMAIL\}/g, CONFIG.CONTACT_EMAIL);
 }
 
 function cleanText_(value, maxLength, keepNewlines) {
