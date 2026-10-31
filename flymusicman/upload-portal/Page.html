@@ -243,6 +243,49 @@
       flex-direction: column;
       justify-content: center;
     }
+    /* The terms card stands alone on its screen; the headline returns in the app. */
+    body.centered .hero { display: none; }
+    .fade-in { animation: fadeIn .6s ease both; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    .splash {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      background: #000;
+      cursor: pointer;
+    }
+    .splash-inner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(600px 420px at 50% 45%, rgba(255, 140, 0, .28), transparent 70%) center / cover no-repeat, #000;
+      opacity: 0;
+      transition: opacity .7s ease;
+    }
+    .splash.show .splash-inner { opacity: 1; }
+    .splash.out .splash-inner { opacity: 0; transition-duration: .6s; }
+    .splash-card { text-align: center; padding: 24px 16px; }
+    .splash-title .nowrap { white-space: nowrap; }
+    .splash-icon { display: block; margin: 0 auto 22px; filter: drop-shadow(0 0 40px rgba(255, 140, 0, .55)); }
+    .splash-title {
+      margin: 0;
+      font: 400 clamp(24px, 8.6vw, 64px)/1.05 "Archivo Black", Impact, sans-serif;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+    .splash-title .brand {
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .splash-by { margin: 18px 0 0; color: var(--muted); font-size: 15px; letter-spacing: .08em; }
+    .splash-by b { color: var(--text); }
+    .splash-by b span { color: var(--accent); }
+
     .door { padding: 24px 20px; }
     .door-title { display: block; margin: 0 0 10px; font-size: 24px; line-height: 1.2; }
     .door-summary { margin: 0 0 16px; font-size: 18px; line-height: 1.45; color: #d6d6de; }
@@ -370,35 +413,33 @@
       text-transform: uppercase;
     }
     .own-text { margin: 0 0 12px; color: var(--muted); font-size: 15px; }
-    footer a.own-link {
-      display: inline-block;
-      padding: 10px 18px;
-      border: 1px solid var(--accent);
-      border-radius: 999px;
-      color: var(--accent);
-      font-size: 16px;
-      font-weight: 800;
-      text-decoration: none;
-    }
-    footer a.own-link:hover { background: var(--accent); color: var(--accent-ink); }
-    .own-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-    .own-copy {
-      padding: 10px 18px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: var(--surface-2);
-      color: var(--text);
-      font: inherit;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-    }
+    /* A plain email link: tap to write, or press and hold to copy the address. */
+    footer a.own-link { color: var(--accent); font-size: 17px; font-weight: 800; }
   </style>
 </head>
 <body>
+  <!-- Opening splash: fades up, holds ~2 seconds, fades to black. Tap to skip. -->
+  <div class="splash" id="splash" aria-hidden="true">
+    <div class="splash-inner" id="splashInner">
+      <div class="splash-card" id="splashCard">
+        <svg class="splash-icon" viewBox="0 0 120 120" width="120" height="120">
+          <defs>
+            <linearGradient id="splashHot" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#ffd400"/><stop offset="1" stop-color="#ff6a00"/>
+            </linearGradient>
+          </defs>
+          <circle cx="60" cy="60" r="56" fill="url(#splashHot)"/>
+          <path d="M60 30 L88 60 H70 V90 H50 V60 H32 Z" fill="#120f00"/>
+        </svg>
+        <p class="splash-title"><span class="brand nowrap">Very simple</span><br><span class="nowrap">Video uploads</span></p>
+        <p class="splash-by">by <b>FLY<span>fx</span></b></p>
+      </div>
+    </div>
+  </div>
+
   <main class="wrap">
     <header class="hero">
-      <h1 class="product"><span class="brand nowrap">Very simple</span><br><span class="nowrap">Video uploads<span class="ver">v08</span></span></h1>
+      <h1 class="product"><span class="brand nowrap">Very simple</span><br><span class="nowrap">Video uploads<span class="ver">v09</span></span></h1>
     </header>
 
     <section id="closed" class="card" hidden>
@@ -530,12 +571,8 @@
       <div class="own">
         <p class="own-eyebrow">Want one of these?</p>
         <p class="own-text">Get an upload page like this for your band, venue, restaurant, or anything else.</p>
-        <!-- Google serves this page in a sandboxed frame, so the email link opens in a new window,
-             and the Copy button covers phones where email links still don't open. -->
-        <div class="own-actions">
-          <a class="own-link" href="mailto:jarvis@flyfx.net?subject=I%20want%20my%20own%20footage%20upload%20page" target="_blank" rel="noopener">Jarvis@FLYfx.net</a>
-          <button class="own-copy" id="copyEmailBtn" type="button">Copy email</button>
-        </div>
+        <!-- Google serves this page in a sandboxed frame, so the email link opens in a new window. -->
+        <a class="own-link" href="mailto:jarvis@flyfx.net?subject=I%20want%20my%20own%20video%20upload%20page" target="_blank" rel="noopener">Jarvis@FLYfx.net</a>
       </div>
     </footer>
     </div>
@@ -620,14 +657,45 @@
     }
     $('doorTitle').textContent = APP.doorTitle;
     $('enterBtn').textContent = APP.doorButton;
-    if (!APP.accepting) {
-      document.body.classList.add('centered');
-      $('closed').hidden = false;
-    } else if (rememberedAgreement()) {
-      openApp();
-    } else {
-      document.body.classList.add('centered');
-      $('door').hidden = false;
+    function showFirstScreen() {
+      if (!APP.accepting) {
+        document.body.classList.add('centered');
+        $('closed').hidden = false;
+        $('closed').classList.add('fade-in');
+      } else if (rememberedAgreement()) {
+        openApp();
+        $('app').classList.add('fade-in');
+      } else {
+        document.body.classList.add('centered');
+        $('door').hidden = false;
+        $('door').classList.add('fade-in');
+      }
+    }
+
+    // Splash: fade up, hold, fade to black, then the first screen. Tap skips it.
+    async function runSplash() {
+      const splash = $('splash');
+      if (APP.splashImage) {
+        $('splashCard').hidden = true;
+        $('splashInner').style.backgroundImage = `url("${APP.splashImage.replace(/"/g, '%22')}")`;
+      }
+      let finished = false;
+      const finish = () => {
+        if (finished) return;
+        finished = true;
+        splash.remove();
+        showFirstScreen();
+      };
+      splash.addEventListener('click', finish);
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return finish();
+      // Give the headline font a moment to load so the title doesn't swap mid-fade.
+      await Promise.race([document.fonts ? document.fonts.ready : null, sleep(800)]);
+      splash.classList.add('show');
+      await sleep(2000);
+      if (finished) return;
+      splash.classList.add('out');
+      await sleep(650);
+      finish();
     }
     $('agreeTerms').addEventListener('change', () => { $('doorError').textContent = ''; });
     $('enterBtn').addEventListener('click', () => {
@@ -975,29 +1043,6 @@
       return el;
     }
 
-    $('copyEmailBtn').addEventListener('click', async () => {
-      const email = 'jarvis@flyfx.net';
-      let copied = false;
-      try {
-        await navigator.clipboard.writeText(email);
-        copied = true;
-      } catch (e) {
-        // The clipboard API is often blocked in Google's frame; fall back to a hidden text box.
-        const box = document.createElement('textarea');
-        box.value = email;
-        box.setAttribute('readonly', '');
-        box.style.position = 'fixed';
-        box.style.opacity = '0';
-        document.body.appendChild(box);
-        box.select();
-        box.setSelectionRange(0, email.length);
-        try { copied = document.execCommand('copy'); } catch (err) { copied = false; }
-        box.remove();
-      }
-      $('copyEmailBtn').textContent = copied ? 'Copied!' : email;
-      setTimeout(() => { $('copyEmailBtn').textContent = 'Copy email'; }, 2500);
-    });
-
     $('againBtn').addEventListener('click', () => {
       Object.assign(state, { files: [], submission: null, offsets: [], fileIndex: 0, live: null, meta: null });
       renderFiles();
@@ -1028,6 +1073,9 @@
     window.addEventListener('beforeunload', (e) => {
       if (state.running) { e.preventDefault(); e.returnValue = ''; }
     });
+
+    // Start once everything above is set up.
+    runSplash();
   })();
   </script>
 </body>

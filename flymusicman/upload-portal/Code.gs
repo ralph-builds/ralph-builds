@@ -58,6 +58,10 @@ const CONFIG = {
   // each person agreed to (and returning visitors are asked again).
   TERMS_NAME: 'Footage Terms',
   RELEASE_VERSION: '2026-10-31-v2',
+  // Opening splash. Blank shows the built-in Very Simple Video Uploads title card;
+  // a full https:// image link shows that image full screen instead (a client's photo or logo).
+  SPLASH_IMAGE_URL: '',
+
   // The first screen: a heading, one plain-English line above the checkbox, and the button.
   DOOR_TITLE: 'Thanks for sharing your footage!',
   RELEASE_SUMMARY: 'Quick OK first: your footage stays yours. You are simply giving permission to use it, with credit if you want it.',
@@ -162,6 +166,7 @@ function publicConfig_() {
   const ready = !!PropertiesService.getScriptProperties().getProperty('FOLDER_ID');
   return {
     rightsHolder: CONFIG.RIGHTS_HOLDER,
+    splashImage: /^https:\/\//.test(CONFIG.SPLASH_IMAGE_URL) ? CONFIG.SPLASH_IMAGE_URL : '',
     broughtBy: CONFIG.BROUGHT_BY,
     broughtByUrl: CONFIG.BROUGHT_BY_URL,
     accepting: isAccepting_() && ready,
