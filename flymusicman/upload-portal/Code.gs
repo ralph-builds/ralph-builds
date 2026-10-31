@@ -21,10 +21,14 @@ const CONFIG = {
   // The person or business that gets permission to use the footage. Use the legal name.
   RIGHTS_HOLDER: 'FlyMusicMan',
   YOUTUBE_URL: 'https://www.youtube.com/@FlyMusicMan',
+  // The page itself stays unbranded. This is the only place the brand shows:
+  // a "Brought to you by" line at the bottom. Leave BROUGHT_BY blank for no branding.
+  BROUGHT_BY: 'FlyMusicMan',
+  BROUGHT_BY_URL: 'https://www.youtube.com/@FlyMusicMan',
   // Where people can write to ask for a video to be left out of anything new.
   CONTACT_EMAIL: 'jarvis@flyfx.net',
   // The line under the headline, shown once people are past the terms screen.
-  INTRO_TEXT: 'Send your videos straight to {BRAND_NAME}. Clips that get picked can end up in his videos, with your name in the credits if you want.',
+  INTRO_TEXT: 'Send your videos in a few taps. Clips that get picked may be used in videos and posts, with your name in the credits if you want.',
 
   // Set to false to close the page to new uploads (it shows a "paused" note).
   // To pause without redeploying, run pauseUploads (and resumeUploads to reopen).
@@ -65,7 +69,7 @@ const CONFIG = {
     'No payment, credit when we can. There’s no payment. We’ll credit you using the name you leave, whenever we can.',
     'Changed your mind? Email {CONTACT_EMAIL} and we’ll leave the video out of anything new.',
   ],
-  PRIZE_TEXT: 'Leave your email to be eligible for future {BRAND_NAME} prize giveaways. Any giveaway will have its own official rules, posted before it starts. We’ll only use your email for giveaways and about your footage, and we won’t sell or share it.',
+  PRIZE_TEXT: 'Leave your email to be eligible for future prize giveaways. Any giveaway will have its own official rules, posted before it starts. Your email is only used for giveaways and about your footage, and it’s never sold or shared.',
 };
 
 // ---------------------------------------------------------------------------
@@ -157,9 +161,9 @@ function doGet() {
 function publicConfig_() {
   const ready = !!PropertiesService.getScriptProperties().getProperty('FOLDER_ID');
   return {
-    brandName: CONFIG.BRAND_NAME,
     rightsHolder: CONFIG.RIGHTS_HOLDER,
-    youtubeUrl: CONFIG.YOUTUBE_URL,
+    broughtBy: CONFIG.BROUGHT_BY,
+    broughtByUrl: CONFIG.BROUGHT_BY_URL,
     accepting: isAccepting_() && ready,
     maxFiles: CONFIG.MAX_FILES_PER_SUBMISSION,
     maxFileBytes: CONFIG.MAX_FILE_GB * GB,

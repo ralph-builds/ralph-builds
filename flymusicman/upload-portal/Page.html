@@ -349,7 +349,9 @@
     .done p strong { color: var(--text); }
 
     footer { text-align: center; color: var(--muted); font-size: 13px; padding-top: 10px; }
-    .powered { margin: 0 0 14px; font-size: 14px; }
+    .brought { margin: 0 0 6px; color: var(--text); font-size: 16px; }
+    .brought a { color: var(--accent); font-weight: 800; }
+    .powered { margin: 0; font-size: 13px; }
     .powered b { color: var(--text); }
     .powered b span { color: var(--accent); }
     footer a { color: var(--text); font-weight: 600; }
@@ -396,7 +398,7 @@
 <body>
   <main class="wrap">
     <header class="hero">
-      <h1 class="product"><span class="brand nowrap">Very simple</span><br><span class="nowrap">Video uploads<span class="ver">v07</span></span></h1>
+      <h1 class="product"><span class="brand nowrap">Very simple</span><br><span class="nowrap">Video uploads<span class="ver">v08</span></span></h1>
     </header>
 
     <section id="closed" class="card" hidden>
@@ -522,8 +524,8 @@
     </section>
 
     <footer>
+      <p class="brought" id="broughtBy" hidden>Brought to you by <a id="broughtByLink" target="_blank" rel="noopener"></a></p>
       <p class="powered">Very Simple Video Uploads · by <b>FLY<span>fx</span></b></p>
-      <a id="youtubeLink" href="#" target="_blank" rel="noopener">Watch <span data-brand></span> on YouTube</a>
       <!-- "Get your own" pitch. Remove this block for client pages that shouldn't carry it. -->
       <div class="own">
         <p class="own-eyebrow">Want one of these?</p>
@@ -570,7 +572,6 @@
     };
 
     // --- Setup ---------------------------------------------------------------
-    document.querySelectorAll('[data-brand]').forEach((el) => { el.textContent = APP.brandName; });
     document.querySelectorAll('[data-terms-name]').forEach((el) => { el.textContent = APP.termsName; });
     document.querySelectorAll('[data-max-files]').forEach((el) => { el.textContent = `Up to ${APP.maxFiles} videos at a time`; });
     // iPadOS reports itself as a Mac, so also check for touch.
@@ -584,7 +585,11 @@
       $('fullQualityBtn').setAttribute('aria-expanded', String(open));
     });
     $('prizeText').textContent = APP.prizeText;
-    $('youtubeLink').href = APP.youtubeUrl;
+    if (APP.broughtBy) {
+      $('broughtByLink').textContent = APP.broughtBy;
+      if (APP.broughtByUrl) $('broughtByLink').href = APP.broughtByUrl;
+      $('broughtBy').hidden = false;
+    }
     $('introText').textContent = APP.introText;
     $('releaseSummary').textContent = APP.releaseSummary;
     $('termsVersion').textContent = `Version ${APP.releaseVersion}`;
