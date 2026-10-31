@@ -60,6 +60,15 @@
       letter-spacing: -.01em;
       text-transform: uppercase;
     }
+    h1 .nowrap { white-space: nowrap; }
+    /* Small version tag, sitting on the baseline of "footage". */
+    h1 .ver {
+      margin-left: 8px;
+      color: var(--muted);
+      font: 700 12px/1 Inter, system-ui, sans-serif;
+      letter-spacing: .06em;
+      text-transform: none;
+    }
     h1 .brand {
       background: linear-gradient(90deg, var(--accent), var(--accent-2));
       -webkit-background-clip: text;
@@ -369,7 +378,7 @@
   <main class="wrap">
     <header class="hero">
       <p class="eyebrow">Footage drop</p>
-      <h1><span class="brand" data-brand></span><br>wants your footage</h1>
+      <h1><span class="brand" data-brand></span><br>wants your <span class="nowrap">footage<span class="ver">v05</span></span></h1>
       <p class="lede">Shot something good? Send it in. Clips that get picked can end up in <span data-brand></span> videos, with your name in the credits if you want.</p>
     </header>
 
