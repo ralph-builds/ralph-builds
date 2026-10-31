@@ -30,7 +30,7 @@ const CONFIG = {
   // Where people can write to ask for a video to be left out of anything new.
   CONTACT_EMAIL: 'jarvis@flyfx.net',
   // The line under the headline, shown once people are past the terms screen.
-  INTRO_TEXT: 'Send your videos in a few taps. Clips that get picked may be used in videos and posts, with your name in the credits if you want.',
+  INTRO_TEXT: 'Clips may be used in videos and posts, with credit if you opt in.',
 
   // Set to false to close the page to new uploads (it shows a "paused" note).
   // To pause without redeploying, run pauseUploads (and resumeUploads to reopen).

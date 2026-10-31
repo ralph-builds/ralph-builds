@@ -400,22 +400,17 @@
     .powered b span { color: var(--accent); }
     footer a { color: var(--text); font-weight: 600; }
     .own {
-      margin: 26px 0 0;
-      padding: 18px 18px 20px;
-      border: 1px dashed var(--line);
+      margin: 10px 0 34px;
+      padding: 22px 20px 24px;
+      border: 1px solid var(--line);
       border-radius: var(--radius);
+      background: var(--surface);
     }
-    .own-eyebrow {
-      margin: 0 0 6px;
-      color: var(--accent);
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-    }
-    .own-text { margin: 0 0 12px; color: var(--muted); font-size: 15px; }
+    .own-title { margin: 0 0 8px; color: var(--accent); font-size: 21px; font-weight: 800; line-height: 1.25; }
+    .own-text { margin: 0; color: var(--text); font-size: 18px; line-height: 1.45; }
     /* A plain email link: tap to write, or press and hold to copy the address. */
-    footer a.own-link { color: var(--accent); font-size: 17px; font-weight: 800; }
+    footer a.own-link { color: var(--accent); font-weight: 800; white-space: nowrap; }
+    .ver-foot { margin-left: 6px; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .06em; }
   </style>
 </head>
 <body>
@@ -440,7 +435,7 @@
 
   <main class="wrap">
     <header class="hero">
-      <h1 class="product"><span class="brand nowrap">Very simple</span><br><span class="nowrap">Video uploads<span class="ver">v10</span></span></h1>
+      <h1 class="product"><span class="brand nowrap">Very simple</span><br><span class="nowrap">Video uploads</span></h1>
     </header>
 
     <section id="closed" class="card" hidden>
@@ -542,7 +537,7 @@
 
       <div class="banner" id="formError" hidden></div>
       <button class="cta" id="submitBtn" type="submit">Send my footage</button>
-      <p class="fine">Big videos can take a few minutes. Keep this page open until it says done.<br>You agreed to the <a href="#" class="terms-link" data-terms-name></a>.</p>
+      <p class="fine">Keep this page open until it says done.</p>
     </form>
 
     <section id="progress" class="card" hidden>
@@ -566,15 +561,16 @@
     </section>
 
     <footer>
-      <p class="brought" id="broughtBy" hidden>Brought to you by <a id="broughtByLink" target="_blank" rel="noopener"></a></p>
-      <p class="powered"><span id="poweredLabel">Brought to you by</span> <a href="https://flyfx.net" target="_blank" rel="noopener"><b>FLY<span>fx</span></b></a></p>
       <!-- "Get your own" pitch. Remove this block for client pages that shouldn't carry it. -->
       <div class="own">
-        <p class="own-eyebrow">Want one of these?</p>
-        <p class="own-text">Get an upload page like this for your band, venue, restaurant or anything else.</p>
-        <!-- Google serves this page in a sandboxed frame, so the email link opens in a new window. -->
-        <a class="own-link" href="mailto:jarvis@flyfx.net?subject=Very%20Simple%20Footage%20Upload%20app%20request%20for%20my%20business." target="_blank" rel="noopener">Jarvis@FLYfx.net</a>
+        <p class="own-title">Want one of these for your business?</p>
+        <p class="own-text">Contact
+          <!-- Google serves this page in a sandboxed frame, so the email link opens in a new window. -->
+          <a class="own-link" href="mailto:jarvis@flyfx.net?subject=Very%20Simple%20Footage%20Upload%20app%20request%20for%20my%20business." target="_blank" rel="noopener">Jarvis@FLYfx.net</a>
+          and we’ll customize this app for you.</p>
       </div>
+      <p class="brought" id="broughtBy" hidden>Brought to you by <a id="broughtByLink" target="_blank" rel="noopener"></a></p>
+      <p class="powered"><span id="poweredLabel">Brought to you by</span> <a href="https://flyfx.net" target="_blank" rel="noopener"><b>FLY<span>fx</span></b></a> <span class="ver-foot">v12</span></p>
     </footer>
     </div>
   </main>
