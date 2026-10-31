@@ -394,8 +394,9 @@
     footer { text-align: center; color: var(--muted); font-size: 13px; padding-top: 10px; }
     .brought { margin: 0 0 6px; color: var(--text); font-size: 16px; }
     .brought a { color: var(--accent); font-weight: 800; }
-    .powered { margin: 0; font-size: 13px; }
-    .powered b { color: var(--text); }
+    .powered { margin: 0; color: var(--text); font-size: 16px; }
+    .powered a { text-decoration: none; }
+    .powered b { color: var(--text); font-weight: 800; }
     .powered b span { color: var(--accent); }
     footer a { color: var(--text); font-weight: 600; }
     .own {
@@ -439,7 +440,7 @@
 
   <main class="wrap">
     <header class="hero">
-      <h1 class="product"><span class="brand nowrap">Very simple</span><br><span class="nowrap">Video uploads<span class="ver">v09</span></span></h1>
+      <h1 class="product"><span class="brand nowrap">Very simple</span><br><span class="nowrap">Video uploads<span class="ver">v10</span></span></h1>
     </header>
 
     <section id="closed" class="card" hidden>
@@ -495,7 +496,7 @@
               <ol>
                 <li>Open <b>Photos</b>, open your video, tap <b>Share</b> → <b>Save to Files</b> → <b>Save</b>.</li>
                 <li>Come back to this page.</li>
-                <li>Tap the button below, choose <b>Choose File</b> (not Photo Library), and pick your video.</li>
+                <li>Tap the button below, choose <b>Choose File</b> (not Photo Library) and pick your video.</li>
               </ol>
               <label class="drop guide-btn">
                 <input class="file-input" type="file" accept="video/*" multiple>
@@ -566,11 +567,11 @@
 
     <footer>
       <p class="brought" id="broughtBy" hidden>Brought to you by <a id="broughtByLink" target="_blank" rel="noopener"></a></p>
-      <p class="powered">Very Simple Video Uploads · by <b>FLY<span>fx</span></b></p>
+      <p class="powered"><span id="poweredLabel">Brought to you by</span> <a href="https://flyfx.net" target="_blank" rel="noopener"><b>FLY<span>fx</span></b></a></p>
       <!-- "Get your own" pitch. Remove this block for client pages that shouldn't carry it. -->
       <div class="own">
         <p class="own-eyebrow">Want one of these?</p>
-        <p class="own-text">Get an upload page like this for your band, venue, restaurant, or anything else.</p>
+        <p class="own-text">Get an upload page like this for your band, venue, restaurant or anything else.</p>
         <!-- Google serves this page in a sandboxed frame, so the email link opens in a new window. -->
         <a class="own-link" href="mailto:jarvis@flyfx.net?subject=Very%20Simple%20Footage%20Upload%20app%20request%20for%20my%20business." target="_blank" rel="noopener">Jarvis@FLYfx.net</a>
       </div>
@@ -626,6 +627,7 @@
       $('broughtByLink').textContent = APP.broughtBy;
       if (APP.broughtByUrl) $('broughtByLink').href = APP.broughtByUrl;
       $('broughtBy').hidden = false;
+      $('poweredLabel').textContent = 'Very Simple Video Uploads by';
     }
     $('introText').textContent = APP.introText;
     $('releaseSummary').textContent = APP.releaseSummary;

@@ -1,5 +1,5 @@
 /**
- * FlyMusicMan footage drop.
+ * Very Simple Video Uploads.
  *
  * A Google Apps Script web app where anyone can upload videos (iPhone-friendly,
  * large files OK) into a Google Drive folder, agree to a footage release, and
@@ -17,14 +17,16 @@
 // > Version: New version > Deploy. The page URL stays the same.
 // ---------------------------------------------------------------------------
 const CONFIG = {
-  BRAND_NAME: 'FlyMusicMan',
+  BRAND_NAME: 'FLYfx',
   // The person or business that gets permission to use the footage. Use the legal name.
-  RIGHTS_HOLDER: 'FlyMusicMan',
-  YOUTUBE_URL: 'https://www.youtube.com/@FlyMusicMan',
+  RIGHTS_HOLDER: 'FLYfx',
+  // Linked in the contributor thank-you email.
+  WEBSITE_URL: 'https://flyfx.net',
   // The page itself stays unbranded. This is the only place the brand shows:
-  // a "Brought to you by" line at the bottom. Leave BROUGHT_BY blank for no branding.
-  BROUGHT_BY: 'FlyMusicMan',
-  BROUGHT_BY_URL: 'https://www.youtube.com/@FlyMusicMan',
+  // a "Brought to you by" line at the bottom. Leave BROUGHT_BY blank and it reads
+  // "Brought to you by FLYfx".
+  BROUGHT_BY: '',
+  BROUGHT_BY_URL: '',
   // Where people can write to ask for a video to be left out of anything new.
   CONTACT_EMAIL: 'jarvis@flyfx.net',
   // The line under the headline, shown once people are past the terms screen.
@@ -57,18 +59,18 @@ const CONFIG = {
   // whenever you change the wording, so the Sheet records exactly which wording
   // each person agreed to (and returning visitors are asked again).
   TERMS_NAME: 'Footage Terms',
-  RELEASE_VERSION: '2026-10-31-v2',
+  RELEASE_VERSION: '2026-10-31-v3',
   // Opening splash. Blank shows the built-in Very Simple Video Uploads title card;
   // a full https:// image link shows that image full screen instead (a client's photo or logo).
   SPLASH_IMAGE_URL: '',
 
-  // The first screen: a heading, one plain-English line above the checkbox, and the button.
+  // The first screen: a heading, one plain-English line above the checkbox and the button.
   DOOR_TITLE: 'Thanks for sharing your footage!',
   RELEASE_SUMMARY: 'Quick OK first: your footage stays yours. You are simply giving permission to use it, with credit if you want it.',
   DOOR_BUTTON: 'I’m in',
   RELEASE_TEXT: [
     'You keep ownership. Your videos stay yours. Sending them here doesn’t change that, and you can still share them anywhere you like.',
-    'You give permission. {RIGHTS_HOLDER} may use, edit and share your videos, in whole or in part, in videos and posts on YouTube, social media and anywhere {RIGHTS_HOLDER} shares music. This permission is free, worldwide and doesn’t expire, so anything already posted can stay up.',
+    'You give permission. {RIGHTS_HOLDER} may use, edit and share your videos, in whole or in part, in videos and posts on YouTube, social media and anywhere else {RIGHTS_HOLDER} shares its work. This permission is free, worldwide and doesn’t expire, so anything already posted can stay up.',
     'It’s yours to share. You shot the videos yourself, and anyone clearly recognizable in them was OK being filmed.',
     'No payment, credit when we can. There’s no payment. We’ll credit you using the name you leave, whenever we can.',
     'Changed your mind? Email {CONTACT_EMAIL} and we’ll leave the video out of anything new.',
@@ -591,7 +593,7 @@ function thankContributor_(s) {
     `Thanks for sending your footage to ${CONFIG.BRAND_NAME}! We received ${s.received} video(s).`,
     s.prizeOptIn ? 'You’re on the list for future prize giveaways. We’ll email you if one comes up.' : '',
     '',
-    `Watch for it: ${CONFIG.YOUTUBE_URL}`,
+    `More at ${CONFIG.WEBSITE_URL}`,
     '',
     `${CONFIG.BRAND_NAME}`,
     `Reference: ${s.id}`,
