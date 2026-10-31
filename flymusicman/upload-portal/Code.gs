@@ -41,6 +41,15 @@ const CONFIG = {
   DAILY_LIMIT_GB: 200,
   // Total accepted in any 60 minutes, so one burst can't use up the whole day.
   HOURLY_LIMIT_GB: 50,
+  // Most that one send may declare across all its videos.
+  MAX_SUBMISSION_GB: 20,
+  // How many sends may start, across everyone. Stops floods of tiny sends.
+  MAX_SENDS_PER_HOUR: 300,
+  MAX_SENDS_PER_DAY: 2000,
+  // A send that stops receiving data for this long has its upload links
+  // cancelled. Its reserved space is returned only once Drive confirms those
+  // links can no longer accept data.
+  STALL_MINUTES: 15,
   // What people see when a cap is hit. You also get an email.
   DAILY_LIMIT_MESSAGE: 'We’re oversaturated for tonight! So many people sent footage. Please try again tomorrow.',
   HOURLY_LIMIT_MESSAGE: 'We’re oversaturated right now! So many people are sending footage. Please try again in an hour.',
@@ -98,6 +107,11 @@ const UPLOAD_URL = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=
 const DIRECT_CHUNK_BYTES = 8 * 1024 * 1024;
 const RELAY_CHUNK_BYTES = 4 * 1024 * 1024;
 const CACHE_SECONDS = 6 * 60 * 60;
+const HOUR_MS = 60 * 60 * 1000;
+const BUCKET_MS = 5 * 60 * 1000;
+// Unsettled sends are listed in one Script property; keep it under the 9 KB limit.
+const PENDING_KEY = 'PENDING';
+const PENDING_MAX = 60;
 const GB = 1024 * 1024 * 1024;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // The page runs in an iframe on a *.googleusercontent.com origin.
@@ -227,24 +241,37 @@ function startSubmission(form) {
 
   const files = validateFiles_(form.files);
   const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
-  reserveBytes_(totalBytes);
-  ensureReleaseLogged_(ids.sheetId);
-  ensureHeaders_(ids.sheetId);
+  if (totalBytes > CONFIG.MAX_SUBMISSION_GB * GB) {
+    throw new Error(`That’s more than ${CONFIG.MAX_SUBMISSION_GB} GB in one go. Please send fewer or shorter videos.`);
+  }
+  settleStalled_();
+  const charge = admit_(totalBytes);
 
   const submissionId = newId_(8);
   const started = formatTime_(new Date());
-  const folderName = `${started.slice(0, 16)} · ${(creditName || 'Anonymous').replace(/[\/\\]/g, '-')} · ${submissionId}`;
-  const folderId = Drive.Files.create({ name: folderName, mimeType: FOLDER_MIME, parents: [ids.folderId] }).id;
-
   const origin = ALLOWED_ORIGIN_RE.test(String(form.origin || '')) ? form.origin : '';
   const cache = CacheService.getScriptCache();
   const fileNames = files.map((f, i) => `${String(i + 1).padStart(2, '0')} ${f.name}`);
-  const uploads = files.map((f, i) => {
-    const session = createUploadSession_(fileNames[i], f.type, f.size, folderId, origin);
-    const uploadId = newId_(32);
-    cache.put(`up_${uploadId}`, JSON.stringify({ uri: session.uri, size: f.size, type: f.type }), CACHE_SECONDS);
-    return { uploadId, sessionUri: session.direct ? session.uri : null };
-  });
+  const sessions = [];
+  let uploads;
+  let folderId;
+  try {
+    ensureReleaseLogged_(ids.sheetId);
+    ensureHeaders_(ids.sheetId);
+    const folderName = `${started.slice(0, 16)} · ${(creditName || 'Anonymous').replace(/[\/\\]/g, '-')} · ${submissionId}`;
+    folderId = Drive.Files.create({ name: folderName, mimeType: FOLDER_MIME, parents: [ids.folderId] }).id;
+    uploads = files.map((f, i) => {
+      const session = createUploadSession_(fileNames[i], f.type, f.size, folderId, origin);
+      sessions.push({ u: session.uri, s: f.size });
+      const uploadId = newId_(32);
+      cache.put(`up_${uploadId}`, JSON.stringify({ uri: session.uri, size: f.size, type: f.type }), CACHE_SECONDS);
+      return { uploadId, sessionUri: session.direct ? session.uri : null };
+    });
+  } catch (err) {
+    rollBackStart_(charge, totalBytes, sessions);
+    throw err;
+  }
+  recordPending_(submissionId, charge, sessions);
 
   const row = new Array(SUBMISSION_HEADERS.length).fill('');
   row[COL['Started']] = started;
@@ -326,11 +353,22 @@ function finishSubmission(submissionId, method, finishToken) {
   // One finish at a time, so a double tap or retry can't send the emails twice.
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
+  let result;
   try {
-    return finishSubmissionLocked_(ids, submissionId, method);
+    result = finishSubmissionLocked_(ids, submissionId, method);
   } finally {
     lock.releaseLock();
   }
+  if (result.status === 'Complete') {
+    // Every video landed, so every byte reserved was used: nothing to hand back.
+    CacheService.getScriptCache().remove(`pend_${submissionId}`);
+    dropPending_(submissionId);
+  } else {
+    // The page has stopped sending: cancel any upload links that never finished
+    // and hand back their reserved space once Drive confirms they're closed.
+    settlePending_(submissionId, 'finish');
+  }
+  return result;
 }
 
 function finishSubmissionLocked_(ids, submissionId, method) {
@@ -424,7 +462,7 @@ function readUploadResponse_(res, upload) {
     const range = header_(res, 'Range');
     return { done: false, next: range ? Number(range.split('-')[1]) + 1 : 0 };
   }
-  if (code === 404 || code === 410) throw new Error('UPLOAD_EXPIRED');
+  if (code === 404 || code === 410 || code === 499) throw new Error('UPLOAD_EXPIRED');
   console.warn('Upload response', code, res.getContentText());
   throw new Error(`Drive returned an error (${code}). Retrying…`);
 }
@@ -481,38 +519,208 @@ function validateFiles_(files) {
   });
 }
 
-/** Counts a submission against the daily and hourly caps, or refuses it. */
-function reserveBytes_(bytes) {
-  const lock = LockService.getScriptLock();
-  lock.waitLock(20000);
-  try {
+/**
+ * Admission control. Under one lock, refuses a send if it would go over the
+ * daily or hourly byte caps or the daily or hourly count of sends, and
+ * otherwise reserves its declared bytes and counts it. Returns where the bytes
+ * were charged, so a confirmed-unused part can be handed back later.
+ */
+function admit_(bytes) {
+  return withLock_(() => {
     const props = PropertiesService.getScriptProperties();
     const now = Date.now();
-    const dayKey = `BYTES_${Utilities.formatDate(new Date(now), Session.getScriptTimeZone(), 'yyyy-MM-dd')}`;
+    const day = dayStamp_(now);
+    const dayKey = `BYTES_${day}`;
+    const startsKey = `STARTS_${day}`;
     const usedToday = Number(props.getProperty(dayKey)) || 0;
-    if (usedToday + bytes > CONFIG.DAILY_LIMIT_GB * GB) {
-      alertOwnerOnce_('DAILY', dayKey, `the daily cap of ${CONFIG.DAILY_LIMIT_GB} GB`);
+    const startsToday = Number(props.getProperty(startsKey)) || 0;
+    if (usedToday + bytes > CONFIG.DAILY_LIMIT_GB * GB || startsToday + 1 > CONFIG.MAX_SENDS_PER_DAY) {
+      alertOwnerOnce_('DAILY', dayKey, `the daily cap of ${CONFIG.DAILY_LIMIT_GB} GB or ${CONFIG.MAX_SENDS_PER_DAY} sends`);
       throw new Error(CONFIG.DAILY_LIMIT_MESSAGE);
     }
 
-    // The last hour, kept as 5-minute buckets: { "<bucket start in ms>": bytes }.
-    const bucketMs = 5 * 60 * 1000;
-    const recent = JSON.parse(props.getProperty('RECENT_BYTES') || '{}');
-    Object.keys(recent).forEach((start) => {
-      if (Number(start) <= now - 60 * 60 * 1000) delete recent[start];
-    });
-    const usedThisHour = Object.keys(recent).reduce((sum, start) => sum + recent[start], 0);
-    if (usedThisHour + bytes > CONFIG.HOURLY_LIMIT_GB * GB) {
-      alertOwnerOnce_('HOURLY', String(Math.floor(now / (60 * 60 * 1000))), `the hourly cap of ${CONFIG.HOURLY_LIMIT_GB} GB`);
+    // The last hour, kept as 5-minute buckets: { "<bucket start in ms>": amount }.
+    const recentBytes = lastHour_(props.getProperty('RECENT_BYTES'), now);
+    const recentStarts = lastHour_(props.getProperty('RECENT_STARTS'), now);
+    const sum = (o) => Object.keys(o).reduce((t, k) => t + o[k], 0);
+    if (sum(recentBytes) + bytes > CONFIG.HOURLY_LIMIT_GB * GB || sum(recentStarts) + 1 > CONFIG.MAX_SENDS_PER_HOUR) {
+      alertOwnerOnce_('HOURLY', String(Math.floor(now / HOUR_MS)), `the hourly cap of ${CONFIG.HOURLY_LIMIT_GB} GB or ${CONFIG.MAX_SENDS_PER_HOUR} sends`);
       throw new Error(CONFIG.HOURLY_LIMIT_MESSAGE);
     }
 
-    const bucket = String(Math.floor(now / bucketMs) * bucketMs);
-    recent[bucket] = (recent[bucket] || 0) + bytes;
-    props.setProperties({ [dayKey]: String(usedToday + bytes), RECENT_BYTES: JSON.stringify(recent) });
+    const bucket = String(Math.floor(now / BUCKET_MS) * BUCKET_MS);
+    recentBytes[bucket] = (recentBytes[bucket] || 0) + bytes;
+    recentStarts[bucket] = (recentStarts[bucket] || 0) + 1;
+    props.setProperties({
+      [dayKey]: String(usedToday + bytes),
+      [startsKey]: String(startsToday + 1),
+      RECENT_BYTES: JSON.stringify(recentBytes),
+      RECENT_STARTS: JSON.stringify(recentStarts),
+    });
     Object.keys(props.getProperties())
-      .filter((k) => k.startsWith('BYTES_') && k !== dayKey)
+      .filter((k) => (k.startsWith('BYTES_') && k !== dayKey) || (k.startsWith('STARTS_') && k !== startsKey))
       .forEach((k) => props.deleteProperty(k));
+    return { d: dayKey, b: bucket };
+  });
+}
+
+/** Hands back reserved bytes, but only to a day or hour window that is still current. */
+function refundBytes_(charge, bytes) {
+  if (bytes > 0) withLock_(() => refundBytesLocked_(charge, bytes));
+}
+
+/**
+ * startSubmission failed after reserving: bytes for videos that never got an
+ * upload link are returned at once; links that were made are cancelled and
+ * their bytes returned only if Drive confirms they're closed.
+ */
+function rollBackStart_(charge, totalBytes, sessions) {
+  let refund = totalBytes - sessions.reduce((t, x) => t + x.s, 0);
+  sessions.forEach((x) => { if (cancelUpload_(x.u, x.s)) refund += x.s; });
+  refundBytes_(charge, refund);
+}
+
+/** Notes an unsettled send: its charge in the index, its upload links in the cache. */
+function recordPending_(submissionId, charge, sessions) {
+  CacheService.getScriptCache().put(`pend_${submissionId}`, JSON.stringify(sessions), CACHE_SECONDS);
+  withLock_(() => {
+    const now = Date.now();
+    const list = readPending_().filter((e) => e.d === `BYTES_${dayStamp_(now)}`);
+    list.push({ s: submissionId, d: charge.d, b: charge.b, c: now, p: 0 });
+    // If the list is full, the oldest are forgotten: their space just stays reserved.
+    writePending_(list.slice(-PENDING_MAX));
+  });
+}
+
+/**
+ * Settles one send. 'finish': the page is done, so any link that hasn't
+ * finished is cancelled. 'sweep': links are only cancelled if no new data
+ * arrived since the last check. Either way, a video's bytes are returned only
+ * after Drive reports its link closed (404, 410 or 499). A finished video keeps
+ * its charge (Drive won't take more than the size declared for it).
+ */
+function settlePending_(submissionId, mode) {
+  const cache = CacheService.getScriptCache();
+  const key = `pend_${submissionId}`;
+  const sessions = JSON.parse(cache.get(key) || 'null');
+  if (!sessions) return dropPending_(submissionId);
+
+  const entry = readPending_().find((e) => e.s === submissionId);
+  const states = sessions.map((x) => probeUpload_(x.u, x.s));
+  const received = states.reduce((t, st) => t + (typeof st === 'number' ? st : 0), 0);
+  const progressing = mode === 'sweep' && entry && received > entry.p;
+  const closed = [];
+  sessions.forEach((x, i) => {
+    if (states[i] === 'done') return;
+    if (states[i] === 'dead' || (!progressing && cancelUpload_(x.u, x.s))) closed.push(x.u);
+  });
+
+  withLock_(() => {
+    // Re-read under the lock, so a finish and a sweep can't both refund the same video.
+    const current = JSON.parse(cache.get(key) || 'null');
+    if (!current) return;
+    const refund = current.filter((x) => closed.includes(x.u)).reduce((t, x) => t + x.s, 0);
+    const left = current.filter((x, i) => !closed.includes(x.u) && states[sessions.findIndex((y) => y.u === x.u)] !== 'done');
+    const list = readPending_();
+    const e = list.find((x) => x.s === submissionId);
+    if (e && refund) refundBytesLocked_(e, refund);
+    if (!left.length) {
+      cache.remove(key);
+      writePending_(list.filter((x) => x.s !== submissionId));
+    } else {
+      cache.put(key, JSON.stringify(left), CACHE_SECONDS);
+      if (e) { e.c = Date.now(); e.p = received; writePending_(list); }
+    }
+  });
+}
+
+/** Checks a few sends that have gone quiet for STALL_MINUTES, oldest first. */
+function settleStalled_() {
+  const stallMs = CONFIG.STALL_MINUTES * 60 * 1000;
+  const claimed = withLock_(() => {
+    const now = Date.now();
+    const list = readPending_().filter((e) => e.d === `BYTES_${dayStamp_(now)}`);
+    const due = list.filter((e) => now - e.c >= stallMs).slice(0, 2);
+    due.forEach((e) => { e.c = now; }); // claim them so a parallel request skips them
+    writePending_(list);
+    return due.map((e) => e.s);
+  });
+  claimed.forEach((sid) => settlePending_(sid, 'sweep'));
+}
+
+function dropPending_(submissionId) {
+  withLock_(() => writePending_(readPending_().filter((e) => e.s !== submissionId)));
+}
+
+/** 'done', 'dead', or the number of bytes Drive has received so far. */
+function probeUpload_(uri, size) {
+  try {
+    const res = UrlFetchApp.fetch(uri, {
+      method: 'put', headers: { 'Content-Range': `bytes */${size}` }, payload: '',
+      muteHttpExceptions: true, followRedirects: false,
+    });
+    const code = res.getResponseCode();
+    if (code === 200 || code === 201) return 'done';
+    if (code === 404 || code === 410 || code === 499) return 'dead';
+    if (code === 308) {
+      const range = header_(res, 'Range');
+      return range ? Number(range.split('-')[1]) + 1 : 0;
+    }
+  } catch (err) {
+    console.warn('Upload status check failed', err);
+  }
+  return 'unknown';
+}
+
+/** Asks Drive to cancel an upload link, then checks. True only if it's confirmed closed. */
+function cancelUpload_(uri, size) {
+  try {
+    UrlFetchApp.fetch(uri, { method: 'delete', muteHttpExceptions: true, followRedirects: false });
+  } catch (err) {
+    console.warn('Upload cancel failed', err);
+  }
+  return probeUpload_(uri, size) === 'dead';
+}
+
+function readPending_() {
+  return JSON.parse(PropertiesService.getScriptProperties().getProperty(PENDING_KEY) || '[]');
+}
+
+function writePending_(list) {
+  PropertiesService.getScriptProperties().setProperty(PENDING_KEY, JSON.stringify(list));
+}
+
+/** refundBytes_ for callers that already hold the lock. */
+function refundBytesLocked_(charge, bytes) {
+  const props = PropertiesService.getScriptProperties();
+  const now = Date.now();
+  const updates = {};
+  if (charge.d === `BYTES_${dayStamp_(now)}`) {
+    updates[charge.d] = String(Math.max(0, (Number(props.getProperty(charge.d)) || 0) - bytes));
+  }
+  const recent = lastHour_(props.getProperty('RECENT_BYTES'), now);
+  if (recent[charge.b] !== undefined) {
+    recent[charge.b] = Math.max(0, recent[charge.b] - bytes);
+    updates.RECENT_BYTES = JSON.stringify(recent);
+  }
+  if (Object.keys(updates).length) props.setProperties(updates);
+}
+
+function lastHour_(json, now) {
+  const buckets = JSON.parse(json || '{}');
+  Object.keys(buckets).forEach((start) => { if (Number(start) <= now - HOUR_MS) delete buckets[start]; });
+  return buckets;
+}
+
+function dayStamp_(ms) {
+  return Utilities.formatDate(new Date(ms), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+}
+
+function withLock_(fn) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    return fn();
   } finally {
     lock.releaseLock();
   }

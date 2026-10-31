@@ -101,10 +101,16 @@ a new URL.)
 
 ## Limits to know about
 
-- Up to 10 videos per submission, 5 GB each, 50 GB in any hour and 200 GB a
-  day in total (all adjustable in `CONFIG`). When a cap is hit, people see an
-  "oversaturated" message and you get one email about it. Drive's own cap is
-  750 GB uploaded per day.
+- Up to 10 videos per send, 5 GB each and 20 GB per send; 50 GB and 300 sends
+  in any hour; 200 GB and 2,000 sends a day (all adjustable in `CONFIG`). When
+  a cap is hit, people see an "oversaturated" message and you get one email
+  about it. Drive's own cap is 750 GB uploaded per day.
+- Space is reserved when a send starts. If a send stops getting data for 15
+  minutes (`STALL_MINUTES`) or finishes with videos missing, the app cancels
+  those videos' upload links and hands their space back, but only after Drive
+  confirms the links are closed. Sends still uploading are never cancelled.
+- The app keeps its own bookkeeping in Script properties (BYTES_, STARTS_,
+  RECENT_BYTES, RECENT_STARTS, PENDING, FINISH_SECRET). Leave those alone.
 - Personal Google accounts can send about 100 emails a day. If you get more
   submissions than that, turn off `SEND_THANK_YOU` or `NOTIFY_OWNER`.
   Submissions still work and are still logged when email runs out.
