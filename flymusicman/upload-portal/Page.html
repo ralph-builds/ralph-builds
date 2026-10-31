@@ -351,6 +351,18 @@
       text-decoration: none;
     }
     footer a.own-link:hover { background: var(--accent); color: var(--accent-ink); }
+    .own-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .own-copy {
+      padding: 10px 18px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--text);
+      font: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -488,7 +500,12 @@
       <div class="own">
         <p class="own-eyebrow">Want one of these?</p>
         <p class="own-text">Get an upload page like this for your band, venue, restaurant, or anything else.</p>
-        <a class="own-link" href="mailto:Jarvis@FLYfx.net?subject=I%20want%20my%20own%20footage%20upload%20page">Jarvis@FLYfx.net</a>
+        <!-- Google serves this page in a sandboxed frame, so the email link opens in a new window,
+             and the Copy button covers phones where email links still don't open. -->
+        <div class="own-actions">
+          <a class="own-link" href="mailto:jarvis@flyfx.net?subject=I%20want%20my%20own%20footage%20upload%20page" target="_blank" rel="noopener">Jarvis@FLYfx.net</a>
+          <button class="own-copy" id="copyEmailBtn" type="button">Copy email</button>
+        </div>
       </div>
     </footer>
   </main>
@@ -869,6 +886,29 @@
       el.textContent = text;
       return el;
     }
+
+    $('copyEmailBtn').addEventListener('click', async () => {
+      const email = 'jarvis@flyfx.net';
+      let copied = false;
+      try {
+        await navigator.clipboard.writeText(email);
+        copied = true;
+      } catch (e) {
+        // The clipboard API is often blocked in Google's frame; fall back to a hidden text box.
+        const box = document.createElement('textarea');
+        box.value = email;
+        box.setAttribute('readonly', '');
+        box.style.position = 'fixed';
+        box.style.opacity = '0';
+        document.body.appendChild(box);
+        box.select();
+        box.setSelectionRange(0, email.length);
+        try { copied = document.execCommand('copy'); } catch (err) { copied = false; }
+        box.remove();
+      }
+      $('copyEmailBtn').textContent = copied ? 'Copied!' : email;
+      setTimeout(() => { $('copyEmailBtn').textContent = 'Copy email'; }, 2500);
+    });
 
     $('againBtn').addEventListener('click', () => {
       Object.assign(state, { files: [], submission: null, offsets: [], fileIndex: 0, live: null, meta: null });
